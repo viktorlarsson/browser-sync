@@ -1,11 +1,11 @@
-var socket = require("socket.io-client");
+import socket = require("socket.io-client");
 
 /**
  * @type {{emit: emit, on: on}}
  */
-var socketConfig = window.___browserSync___.socketConfig;
-var socketUrl = window.___browserSync___.socketUrl;
-var io = socket(socketUrl, socketConfig);
+const socketConfig = window.___browserSync___.socketConfig;
+const socketUrl = window.___browserSync___.socketUrl;
+const io = socket(socketUrl, socketConfig);
 
 /**
  * *****BACK-COMPAT*******
@@ -16,27 +16,28 @@ window.___browserSync___.socket = io;
 /**
  * @returns {string}
  */
-exports.getPath = function() {
+export function getPath() {
     return window.location.pathname;
-};
+}
+
 /**
  * Alias for socket.emit
  * @param name
  * @param data
  */
-exports.emit = function(name, data) {
+export function emit(name, data) {
     if (io && io.emit) {
         // send relative path of where the event is sent
-        data.url = exports.getPath();
+        data.url = getPath();
         io.emit(name, data);
     }
-};
+}
 
 /**
  * Alias for socket.on
  * @param name
  * @param func
  */
-exports.on = function(name, func) {
+export function on(name, func) {
     io.on(name, func);
-};
+}

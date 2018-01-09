@@ -4,10 +4,10 @@
  * This is the plugin for syncing scroll between devices
  * @type {string}
  */
-var WINDOW_EVENT_NAME = "scroll";
-var ELEMENT_EVENT_NAME = "scroll:element";
-var OPT_PATH = "ghostMode.scroll";
-var utils;
+const utils = require('./browser.utils');
+const WINDOW_EVENT_NAME = "scroll";
+const ELEMENT_EVENT_NAME = "scroll:element";
+const OPT_PATH = "ghostMode.scroll";
 
 exports.canEmitEvents = true;
 
@@ -16,7 +16,6 @@ exports.canEmitEvents = true;
  * @param eventManager
  */
 exports.init = function(bs, eventManager) {
-    utils = bs.utils;
     var opts = bs.options;
 
     /**

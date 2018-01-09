@@ -1,4 +1,4 @@
-"use strict";
+const {getElementData, getSingleElement} = require('./browser.utils');
 
 /**
  * This is the plugin for syncing clicks between browsers
@@ -27,7 +27,7 @@ exports.browserEvent = function(bs) {
     return function(event) {
         if (exports.canEmitEvents) {
             var elem = event.target || event.srcElement;
-            var data = bs.utils.getElementData(elem);
+            var data = getElementData(elem);
             data.type = event.type;
             bs.socket.emit(EVENT_NAME, data);
         } else {
@@ -46,7 +46,7 @@ exports.socketEvent = function(bs) {
             return false;
         }
 
-        var elem = bs.utils.getSingleElement(data.tagName, data.index);
+        var elem = getSingleElement(data.tagName, data.index);
 
         exports.canEmitEvents = false;
 

@@ -1,4 +1,4 @@
-"use strict";
+const {getElementData, getSingleElement, forceChange} = require('./browser.utils');
 
 /**
  * This is the plugin for syncing clicks between browsers
@@ -28,11 +28,11 @@ exports.browserEvent = function(bs) {
             var elem = event.target || event.srcElement;
 
             if (elem.type === "checkbox" || elem.type === "radio") {
-                bs.utils.forceChange(elem);
+                forceChange(elem);
                 return;
             }
 
-            bs.socket.emit(EVENT_NAME, bs.utils.getElementData(elem));
+            bs.socket.emit(EVENT_NAME, getElementData(elem));
         } else {
             exports.canEmitEvents = true;
         }
@@ -50,7 +50,7 @@ exports.socketEvent = function(bs, eventManager) {
             return false;
         }
 
-        var elem = bs.utils.getSingleElement(data.tagName, data.index);
+        var elem = getSingleElement(data.tagName, data.index);
 
         if (elem) {
             exports.canEmitEvents = false;
