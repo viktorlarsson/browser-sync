@@ -1,23 +1,21 @@
-import {getByPath, isUndefined} from "./browser.utils";
+import { getByPath, isUndefined } from "./browser.utils";
 
 interface BrowserSyncInit {
-    socket: any,
-    emitter: any,
-    options: bs.InitOptions
+    socket: any;
+    emitter: any;
+    options: bs.InitOptions;
 }
 
 /**
  * @constructor
  */
 export class BrowserSync {
-
     public socket: any;
     public emitter: any;
     public options: bs.InitOptions;
     public tabHidden: boolean = false;
 
     constructor(public init: BrowserSyncInit) {
-
         this.socket = init.socket;
         this.emitter = init.emitter;
         this.options = init.options;
@@ -25,7 +23,7 @@ export class BrowserSync {
         /**
          * Options set
          */
-        this.socket.on("options:set", (data: {options: bs.InitOptions}) => {
+        this.socket.on("options:set", (data: { options: bs.InitOptions }) => {
             this.emitter.emit("notify", "Setting options...");
             this.options = data.options;
         });
@@ -44,7 +42,6 @@ export class BrowserSync {
      * @returns {boolean}
      */
     canSync(data, optPath) {
-
         data = data || {};
 
         if (data.override) {
@@ -77,5 +74,3 @@ export class BrowserSync {
         }
     }
 }
-
-

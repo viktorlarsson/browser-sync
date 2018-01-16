@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 33);
+/******/ 	return __webpack_require__(__webpack_require__.s = 24);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -100,7 +100,7 @@ module.exports = g;
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(37);
+exports = module.exports = __webpack_require__(29);
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -280,10 +280,207 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(15)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)))
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * @returns {window}
+ */
+function getWindow() {
+    return window;
+}
+exports.getWindow = getWindow;
+/**
+ * @returns {HTMLDocument}
+ */
+function getDocument() {
+    return document;
+}
+exports.getDocument = getDocument;
+/**
+ * Get the current x/y position crossbow
+ * @returns {{x: *, y: *}}
+ */
+function getBrowserScrollPosition() {
+    var $window = getWindow();
+    var $document = getDocument();
+    var scrollX;
+    var scrollY;
+    var dElement = $document.documentElement;
+    var dBody = $document.body;
+    if ($window.pageYOffset !== undefined) {
+        scrollX = $window.pageXOffset;
+        scrollY = $window.pageYOffset;
+    }
+    else {
+        scrollX = dElement.scrollLeft || dBody.scrollLeft || 0;
+        scrollY = dElement.scrollTop || dBody.scrollTop || 0;
+    }
+    return {
+        x: scrollX,
+        y: scrollY
+    };
+}
+exports.getBrowserScrollPosition = getBrowserScrollPosition;
+/**
+ * @returns {{x: number, y: number}}
+ */
+function getScrollSpace() {
+    var $document = getDocument();
+    var dElement = $document.documentElement;
+    var dBody = $document.body;
+    return {
+        x: dBody.scrollHeight - dElement.clientWidth,
+        y: dBody.scrollHeight - dElement.clientHeight
+    };
+}
+exports.getScrollSpace = getScrollSpace;
+/**
+ * Saves scroll position into cookies
+ */
+function saveScrollPosition() {
+    var pos = getBrowserScrollPosition();
+    getDocument().cookie = "bs_scroll_pos=" + [pos.x, pos.y].join(",");
+}
+exports.saveScrollPosition = saveScrollPosition;
+/**
+ * Restores scroll position from cookies
+ */
+function restoreScrollPosition() {
+    var pos = getDocument()
+        .cookie.replace(/(?:(?:^|.*;\s*)bs_scroll_pos\s*\=\s*([^;]*).*$)|^.*$/, "$1")
+        .split(",");
+    getWindow().scrollTo(Number(pos[0]), Number(pos[1]));
+}
+exports.restoreScrollPosition = restoreScrollPosition;
+/**
+ * @param tagName
+ * @param elem
+ * @returns {*|number}
+ */
+function getElementIndex(tagName, elem) {
+    var allElems = getDocument().getElementsByTagName(tagName);
+    return Array.prototype.indexOf.call(allElems, elem);
+}
+exports.getElementIndex = getElementIndex;
+/**
+ * Force Change event on radio & checkboxes (IE)
+ */
+function forceChange(elem) {
+    elem.blur();
+    elem.focus();
+}
+exports.forceChange = forceChange;
+/**
+ * @param elem
+ * @returns {{tagName: (elem.tagName|*), index: *}}
+ */
+function getElementData(elem) {
+    var tagName = elem.tagName;
+    var index = getElementIndex(tagName, elem);
+    return {
+        tagName: tagName,
+        index: index
+    };
+}
+exports.getElementData = getElementData;
+/**
+ * @param {string} tagName
+ * @param {number} index
+ */
+function getSingleElement(tagName, index) {
+    var elems = getDocument().getElementsByTagName(tagName);
+    return elems[index];
+}
+exports.getSingleElement = getSingleElement;
+/**
+ * Get the body element
+ */
+function getBody() {
+    return getDocument().getElementsByTagName("body")[0];
+}
+exports.getBody = getBody;
+/**
+ * @param {{x: number, y: number}} pos
+ */
+function setScroll(pos) {
+    getWindow().scrollTo(pos.x, pos.y);
+}
+exports.setScroll = setScroll;
+/**
+ * Hard reload
+ */
+function reloadBrowser() {
+    getWindow().location.reload(true);
+}
+exports.reloadBrowser = reloadBrowser;
+/**
+ * Foreach polyfill
+ * @param coll
+ * @param fn
+ */
+function forEach(coll, fn) {
+    for (var i = 0, n = coll.length; i < n; i += 1) {
+        fn(coll[i], i, coll);
+    }
+}
+exports.forEach = forEach;
+/**
+ * Are we dealing with old IE?
+ * @returns {boolean}
+ */
+function isOldIe() {
+    return typeof getWindow().attachEvent !== "undefined";
+}
+exports.isOldIe = isOldIe;
+/**
+ * Split the URL information
+ * @returns {object}
+ */
+function getLocation(url) {
+    var location = getDocument().createElement("a");
+    location.href = url;
+    if (location.host === "") {
+        location.href = location.href;
+    }
+    return location;
+}
+exports.getLocation = getLocation;
+/**
+ * @param {String} val
+ * @returns {boolean}
+ */
+function isUndefined(val) {
+    return "undefined" === typeof val;
+}
+exports.isUndefined = isUndefined;
+/**
+ * @param obj
+ * @param path
+ */
+function getByPath(obj, path) {
+    for (var i = 0, tempPath = path.split("."), len = tempPath.length; i < len; i++) {
+        if (!obj || typeof obj !== "object") {
+            return false;
+        }
+        obj = obj[tempPath[i]];
+    }
+    if (typeof obj === "undefined") {
+        return false;
+    }
+    return obj;
+}
+exports.getByPath = getByPath;
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -452,22 +649,22 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies.
  */
 
-var keys = __webpack_require__(46);
-var hasBinary = __webpack_require__(16);
-var sliceBuffer = __webpack_require__(47);
-var after = __webpack_require__(48);
-var utf8 = __webpack_require__(49);
+var keys = __webpack_require__(38);
+var hasBinary = __webpack_require__(13);
+var sliceBuffer = __webpack_require__(39);
+var after = __webpack_require__(40);
+var utf8 = __webpack_require__(41);
 
 var base64encoder;
 if (global && global.ArrayBuffer) {
-  base64encoder = __webpack_require__(51);
+  base64encoder = __webpack_require__(43);
 }
 
 /**
@@ -525,7 +722,7 @@ var err = { type: 'error', data: 'parser error' };
  * Create a blob api even for blob builder when vendor prefixes exist
  */
 
-var Blob = __webpack_require__(52);
+var Blob = __webpack_require__(44);
 
 /**
  * Encodes a packet.
@@ -1065,170 +1262,6 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var utils = exports;
-/**
- * @returns {window}
- */
-utils.getWindow = function () {
-    return window;
-};
-/**
- * @returns {HTMLDocument}
- */
-utils.getDocument = function () {
-    return document;
-};
-/**
- * @returns {HTMLElement}
- */
-utils.getBody = function () {
-    return document.getElementsByTagName("body")[0];
-};
-/**
- * Get the current x/y position crossbow
- * @returns {{x: *, y: *}}
- */
-utils.getBrowserScrollPosition = function () {
-    var $window = exports.getWindow();
-    var $document = exports.getDocument();
-    var scrollX;
-    var scrollY;
-    var dElement = $document.documentElement;
-    var dBody = $document.body;
-    if ($window.pageYOffset !== undefined) {
-        scrollX = $window.pageXOffset;
-        scrollY = $window.pageYOffset;
-    }
-    else {
-        scrollX = dElement.scrollLeft || dBody.scrollLeft || 0;
-        scrollY = dElement.scrollTop || dBody.scrollTop || 0;
-    }
-    return {
-        x: scrollX,
-        y: scrollY
-    };
-};
-/**
- * @returns {{x: number, y: number}}
- */
-utils.getScrollSpace = function () {
-    var $document = exports.getDocument();
-    var dElement = $document.documentElement;
-    var dBody = $document.body;
-    return {
-        x: dBody.scrollHeight - dElement.clientWidth,
-        y: dBody.scrollHeight - dElement.clientHeight
-    };
-};
-/**
- * Saves scroll position into cookies
- */
-utils.saveScrollPosition = function () {
-    var pos = utils.getBrowserScrollPosition();
-    pos = [pos.x, pos.y];
-    utils.getDocument.cookie = "bs_scroll_pos=" + pos.join(",");
-};
-/**
- * Restores scroll position from cookies
- */
-utils.restoreScrollPosition = function () {
-    var pos = utils
-        .getDocument()
-        .cookie.replace(/(?:(?:^|.*;\s*)bs_scroll_pos\s*\=\s*([^;]*).*$)|^.*$/, "$1")
-        .split(",");
-    utils.getWindow().scrollTo(pos[0], pos[1]);
-};
-/**
- * @param tagName
- * @param elem
- * @returns {*|number}
- */
-utils.getElementIndex = function (tagName, elem) {
-    var allElems = utils.getDocument().getElementsByTagName(tagName);
-    return Array.prototype.indexOf.call(allElems, elem);
-};
-/**
- * Force Change event on radio & checkboxes (IE)
- */
-utils.forceChange = function (elem) {
-    elem.blur();
-    elem.focus();
-};
-/**
- * @param elem
- * @returns {{tagName: (elem.tagName|*), index: *}}
- */
-utils.getElementData = function (elem) {
-    var tagName = elem.tagName;
-    var index = utils.getElementIndex(tagName, elem);
-    return {
-        tagName: tagName,
-        index: index
-    };
-};
-/**
- * @param {string} tagName
- * @param {number} index
- */
-utils.getSingleElement = function (tagName, index) {
-    var elems = utils.getDocument().getElementsByTagName(tagName);
-    return elems[index];
-};
-/**
- * Get the body element
- */
-utils.getBody = function () {
-    return utils.getDocument().getElementsByTagName("body")[0];
-};
-/**
- * @param {{x: number, y: number}} pos
- */
-utils.setScroll = function (pos) {
-    utils.getWindow().scrollTo(pos.x, pos.y);
-};
-/**
- * Hard reload
- */
-utils.reloadBrowser = function () {
-    utils.getWindow().location.reload(true);
-};
-/**
- * Foreach polyfill
- * @param coll
- * @param fn
- */
-utils.forEach = function (coll, fn) {
-    for (var i = 0, n = coll.length; i < n; i += 1) {
-        fn(coll[i], i, coll);
-    }
-};
-/**
- * Are we dealing with old IE?
- * @returns {boolean}
- */
-utils.isOldIe = function () {
-    return typeof utils.getWindow().attachEvent !== "undefined";
-};
-/**
- * Split the URL information
- * @returns {object}
- */
-utils.getLocation = function (url) {
-    var location = utils.getDocument().createElement("a");
-    location.href = url;
-    if (location.host === "") {
-        location.href = location.href;
-    }
-    return location;
-};
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports) {
 
@@ -1287,54 +1320,16 @@ module.exports = function(a, b){
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-exports.events = {};
-/**
- * @param name
- * @param data
- */
-exports.emit = function (name, data) {
-    var event = exports.events[name];
-    var listeners;
-    if (event && event.listeners) {
-        listeners = event.listeners;
-        for (var i = 0, n = listeners.length; i < n; i += 1) {
-            listeners[i](data);
-        }
-    }
-};
-/**
- * @param name
- * @param func
- */
-exports.on = function (name, func) {
-    var events = exports.events;
-    if (!events[name]) {
-        events[name] = {
-            listeners: [func]
-        };
-    }
-    else {
-        events[name].listeners.push(func);
-    }
-};
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
 
 /**
  * Module dependencies.
  */
 
 var debug = __webpack_require__(1)('socket.io-parser');
-var Emitter = __webpack_require__(2);
-var hasBin = __webpack_require__(16);
-var binary = __webpack_require__(40);
-var isBuf = __webpack_require__(17);
+var Emitter = __webpack_require__(3);
+var hasBin = __webpack_require__(13);
+var binary = __webpack_require__(32);
+var isBuf = __webpack_require__(14);
 
 /**
  * Protocol version.
@@ -1728,12 +1723,12 @@ function error() {
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {// browser shim for xmlhttprequest module
 
-var hasCORS = __webpack_require__(44);
+var hasCORS = __webpack_require__(36);
 
 module.exports = function (opts) {
   var xdomain = opts.xdomain;
@@ -1772,15 +1767,15 @@ module.exports = function (opts) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var parser = __webpack_require__(3);
-var Emitter = __webpack_require__(2);
+var parser = __webpack_require__(4);
+var Emitter = __webpack_require__(3);
 
 /**
  * Module exports.
@@ -1935,160 +1930,7 @@ Transport.prototype.onClose = function () {
 
 
 /***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/**
- * This is the plugin for syncing scroll between devices
- * @type {string}
- */
-var WINDOW_EVENT_NAME = "scroll";
-var ELEMENT_EVENT_NAME = "scroll:element";
-var OPT_PATH = "ghostMode.scroll";
-var utils;
-exports.canEmitEvents = true;
-/**
- * @param {BrowserSync} bs
- * @param eventManager
- */
-exports.init = function (bs, eventManager) {
-    utils = bs.utils;
-    var opts = bs.options;
-    /**
-     * Window Scroll events
-     */
-    eventManager.addEvent(window, WINDOW_EVENT_NAME, exports.browserEvent(bs));
-    bs.socket.on(WINDOW_EVENT_NAME, exports.socketEvent(bs));
-    /**
-     * element Scroll Events
-     */
-    var cache = {};
-    addElementScrollEvents("scrollElements", false);
-    addElementScrollEvents("scrollElementMapping", true);
-    bs.socket.on(ELEMENT_EVENT_NAME, exports.socketEventForElement(bs, cache));
-    function addElementScrollEvents(key, map) {
-        if (!opts[key] ||
-            !opts[key].length ||
-            !("querySelectorAll" in document)) {
-            return;
-        }
-        utils.forEach(opts[key], function (selector) {
-            var elems = document.querySelectorAll(selector) || [];
-            utils.forEach(elems, function (elem) {
-                var data = utils.getElementData(elem);
-                data.cacheSelector = data.tagName + ":" + data.index;
-                data.map = map;
-                cache[data.cacheSelector] = elem;
-                eventManager.addEvent(elem, WINDOW_EVENT_NAME, exports.browserEventForElement(bs, elem, data));
-            });
-        });
-    }
-};
-/**
- * @param {BrowserSync} bs
- */
-exports.socketEvent = function (bs) {
-    return function (data) {
-        if (!bs.canSync(data, OPT_PATH)) {
-            return false;
-        }
-        var scrollSpace = utils.getScrollSpace();
-        exports.canEmitEvents = false;
-        if (bs.options && bs.options.scrollProportionally) {
-            return window.scrollTo(0, scrollSpace.y * data.position.proportional); // % of y axis of scroll to px
-        }
-        else {
-            return window.scrollTo(0, data.position.raw.y);
-        }
-    };
-};
-/**
- * @param bs
- */
-exports.socketEventForElement = function (bs, cache) {
-    return function (data) {
-        if (!bs.canSync(data, OPT_PATH)) {
-            return false;
-        }
-        exports.canEmitEvents = false;
-        function scrollOne(selector, pos) {
-            if (cache[selector]) {
-                cache[selector].scrollTop = pos;
-            }
-        }
-        if (data.map) {
-            return Object.keys(cache).forEach(function (key) {
-                scrollOne(key, data.position);
-            });
-        }
-        scrollOne(data.elem.cacheSelector, data.position);
-    };
-};
-/**
- * @param bs
- */
-exports.browserEventForElement = function (bs, elem, data) {
-    return function () {
-        var canSync = exports.canEmitEvents;
-        if (canSync) {
-            bs.socket.emit(ELEMENT_EVENT_NAME, {
-                position: elem.scrollTop,
-                elem: data,
-                map: data.map
-            });
-        }
-        exports.canEmitEvents = true;
-    };
-};
-exports.browserEvent = function (bs) {
-    return function () {
-        var canSync = exports.canEmitEvents;
-        if (canSync) {
-            bs.socket.emit(WINDOW_EVENT_NAME, {
-                position: exports.getScrollPosition()
-            });
-        }
-        exports.canEmitEvents = true;
-    };
-};
-/**
- * @returns {{raw: number, proportional: number}}
- */
-exports.getScrollPosition = function () {
-    var pos = utils.getBrowserScrollPosition();
-    return {
-        raw: pos,
-        proportional: exports.getScrollTopPercentage(pos) // Get % of y axis of scroll
-    };
-};
-/**
- * @param {{x: number, y: number}} scrollSpace
- * @param scrollPosition
- * @returns {{x: number, y: number}}
- */
-exports.getScrollPercentage = function (scrollSpace, scrollPosition) {
-    var x = scrollPosition.x / scrollSpace.x;
-    var y = scrollPosition.y / scrollSpace.y;
-    return {
-        x: x || 0,
-        y: y
-    };
-};
-/**
- * Get just the percentage of Y axis of scroll
- * @returns {number}
- */
-exports.getScrollTopPercentage = function (pos) {
-    var scrollSpace = utils.getScrollSpace();
-    var percentage = exports.getScrollPercentage(scrollSpace, pos);
-    return percentage.y;
-};
-
-
-/***/ }),
-/* 12 */
+/* 10 */
 /***/ (function(module, exports) {
 
 exports._ElementCache = function () {
@@ -2319,51 +2161,7 @@ exports.manager = eventManager;
 
 
 /***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var socket = __webpack_require__(35);
-/**
- * @type {{emit: emit, on: on}}
- */
-var socketConfig = window.___browserSync___.socketConfig;
-var socketUrl = window.___browserSync___.socketUrl;
-var io = socket(socketUrl, socketConfig);
-/**
- * *****BACK-COMPAT*******
- * Scripts that come after Browsersync may rely on the previous window.___browserSync___.socket
- */
-window.___browserSync___.socket = io;
-/**
- * @returns {string}
- */
-exports.getPath = function () {
-    return window.location.pathname;
-};
-/**
- * Alias for socket.emit
- * @param name
- * @param data
- */
-exports.emit = function (name, data) {
-    if (io && io.emit) {
-        // send relative path of where the event is sent
-        data.url = exports.getPath();
-        io.emit(name, data);
-    }
-};
-/**
- * Alias for socket.on
- * @param name
- * @param func
- */
-exports.on = function (name, func) {
-    io.on(name, func);
-};
-
-
-/***/ }),
-/* 14 */
+/* 11 */
 /***/ (function(module, exports) {
 
 /**
@@ -2408,7 +2206,7 @@ module.exports = function parseuri(str) {
 
 
 /***/ }),
-/* 15 */
+/* 12 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -2598,7 +2396,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 16 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/* global Blob File */
@@ -2607,7 +2405,7 @@ process.umask = function() { return 0; };
  * Module requirements.
  */
 
-var isArray = __webpack_require__(39);
+var isArray = __webpack_require__(31);
 
 var toString = Object.prototype.toString;
 var withNativeBlob = typeof global.Blob === 'function' || toString.call(global.Blob) === '[object BlobConstructor]';
@@ -2667,7 +2465,7 @@ function hasBinary (obj) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 17 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -2687,7 +2485,7 @@ function isBuf(obj) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 18 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -2695,15 +2493,15 @@ function isBuf(obj) {
  * Module dependencies.
  */
 
-var eio = __webpack_require__(42);
-var Socket = __webpack_require__(23);
-var Emitter = __webpack_require__(2);
-var parser = __webpack_require__(8);
-var on = __webpack_require__(24);
-var bind = __webpack_require__(25);
+var eio = __webpack_require__(34);
+var Socket = __webpack_require__(20);
+var Emitter = __webpack_require__(3);
+var parser = __webpack_require__(7);
+var on = __webpack_require__(21);
+var bind = __webpack_require__(22);
 var debug = __webpack_require__(1)('socket.io-client:manager');
-var indexOf = __webpack_require__(22);
-var Backoff = __webpack_require__(57);
+var indexOf = __webpack_require__(19);
+var Backoff = __webpack_require__(49);
 
 /**
  * IE6+ hasOwnProperty
@@ -3266,17 +3064,17 @@ Manager.prototype.onreconnect = function () {
 
 
 /***/ }),
-/* 19 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies
  */
 
-var XMLHttpRequest = __webpack_require__(9);
-var XHR = __webpack_require__(45);
-var JSONP = __webpack_require__(53);
-var websocket = __webpack_require__(54);
+var XMLHttpRequest = __webpack_require__(8);
+var XHR = __webpack_require__(37);
+var JSONP = __webpack_require__(45);
+var websocket = __webpack_require__(46);
 
 /**
  * Export transports.
@@ -3326,18 +3124,18 @@ function polling (opts) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 20 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(10);
+var Transport = __webpack_require__(9);
 var parseqs = __webpack_require__(5);
-var parser = __webpack_require__(3);
+var parser = __webpack_require__(4);
 var inherit = __webpack_require__(6);
-var yeast = __webpack_require__(21);
+var yeast = __webpack_require__(18);
 var debug = __webpack_require__(1)('engine.io-client:polling');
 
 /**
@@ -3351,7 +3149,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function () {
-  var XMLHttpRequest = __webpack_require__(9);
+  var XMLHttpRequest = __webpack_require__(8);
   var xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -3577,7 +3375,7 @@ Polling.prototype.uri = function () {
 
 
 /***/ }),
-/* 21 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3652,7 +3450,7 @@ module.exports = yeast;
 
 
 /***/ }),
-/* 22 */
+/* 19 */
 /***/ (function(module, exports) {
 
 
@@ -3667,7 +3465,7 @@ module.exports = function(arr, obj){
 };
 
 /***/ }),
-/* 23 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -3675,11 +3473,11 @@ module.exports = function(arr, obj){
  * Module dependencies.
  */
 
-var parser = __webpack_require__(8);
-var Emitter = __webpack_require__(2);
-var toArray = __webpack_require__(56);
-var on = __webpack_require__(24);
-var bind = __webpack_require__(25);
+var parser = __webpack_require__(7);
+var Emitter = __webpack_require__(3);
+var toArray = __webpack_require__(48);
+var on = __webpack_require__(21);
+var bind = __webpack_require__(22);
 var debug = __webpack_require__(1)('socket.io-client:socket');
 var parseqs = __webpack_require__(5);
 
@@ -4091,7 +3889,7 @@ Socket.prototype.compress = function (compress) {
 
 
 /***/ }),
-/* 24 */
+/* 21 */
 /***/ (function(module, exports) {
 
 
@@ -4121,7 +3919,7 @@ function on (obj, ev, fn) {
 
 
 /***/ }),
-/* 25 */
+/* 22 */
 /***/ (function(module, exports) {
 
 /**
@@ -4150,553 +3948,270 @@ module.exports = function(obj, fn){
 
 
 /***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var scroll = __webpack_require__(11);
-var utils = __webpack_require__(4);
-var styles = {
-    display: "none",
-    padding: "15px",
-    fontFamily: "sans-serif",
-    position: "fixed",
-    fontSize: "0.9em",
-    zIndex: 9999,
-    right: 0,
-    top: 0,
-    borderBottomLeftRadius: "5px",
-    backgroundColor: "#1B2032",
-    margin: 0,
-    color: "white",
-    textAlign: "center",
-    pointerEvents: "none"
-};
-var elem;
-var options;
-var timeoutInt;
-/**
- * @param {BrowserSync} bs
- * @returns {*}
- */
-exports.init = function (bs) {
-    options = bs.options;
-    var cssStyles = styles;
-    if (options.notify.styles) {
-        if (Object.prototype.toString.call(options.notify.styles) ===
-            "[object Array]") {
-            // handle original array behavior, replace all styles with a joined copy
-            cssStyles = options.notify.styles.join(";");
-        }
-        else {
-            for (var key in options.notify.styles) {
-                if (options.notify.styles.hasOwnProperty(key)) {
-                    cssStyles[key] = options.notify.styles[key];
-                }
-            }
-        }
-    }
-    elem = document.createElement("DIV");
-    elem.id = "__bs_notify__";
-    if (typeof cssStyles === "string") {
-        elem.style.cssText = cssStyles;
-    }
-    else {
-        for (var rule in cssStyles) {
-            elem.style[rule] = cssStyles[rule];
-        }
-    }
-    var flashFn = exports.watchEvent(bs);
-    bs.emitter.on("notify", flashFn);
-    bs.socket.on("browser:notify", flashFn);
-    return elem;
-};
-/**
- * @returns {Function}
- */
-exports.watchEvent = function (bs) {
-    return function (data) {
-        if (bs.options.notify || data.override) {
-            if (typeof data === "string") {
-                return exports.flash(data);
-            }
-            exports.flash(data.message, data.timeout);
-        }
-    };
-};
-/**
- *
- */
-exports.getElem = function () {
-    return elem;
-};
-/**
- * @param message
- * @param [timeout]
- * @returns {*}
- */
-exports.flash = function (message, timeout) {
-    var elem = exports.getElem();
-    var $body = utils.getBody();
-    // return if notify was never initialised
-    if (!elem) {
-        return false;
-    }
-    elem.innerHTML = message;
-    elem.style.display = "block";
-    $body.appendChild(elem);
-    if (timeoutInt) {
-        clearTimeout(timeoutInt);
-        timeoutInt = undefined;
-    }
-    timeoutInt = window.setTimeout(function () {
-        elem.style.display = "none";
-        if (elem.parentNode) {
-            $body.removeChild(elem);
-        }
-    }, timeout || 2000);
-    return elem;
-};
-
-
-/***/ }),
-/* 27 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 /**
- * This is the plugin for syncing clicks between browsers
+ * This is the plugin for syncing scroll between devices
  * @type {string}
  */
-var EVENT_NAME = "click";
-var OPT_PATH = "ghostMode.clicks";
+var utils = __webpack_require__(2);
+var WINDOW_EVENT_NAME = "scroll";
+var ELEMENT_EVENT_NAME = "scroll:element";
+var OPT_PATH = "ghostMode.scroll";
 exports.canEmitEvents = true;
 /**
  * @param {BrowserSync} bs
  * @param eventManager
  */
 exports.init = function (bs, eventManager) {
-    eventManager.addEvent(document.body, EVENT_NAME, exports.browserEvent(bs));
-    bs.socket.on(EVENT_NAME, exports.socketEvent(bs, eventManager));
+    var opts = bs.options;
+    /**
+     * Window Scroll events
+     */
+    eventManager.addEvent(window, WINDOW_EVENT_NAME, exports.browserEvent(bs));
+    bs.socket.on(WINDOW_EVENT_NAME, exports.socketEvent(bs));
+    /**
+     * element Scroll Events
+     */
+    var cache = {};
+    addElementScrollEvents("scrollElements", false);
+    addElementScrollEvents("scrollElementMapping", true);
+    bs.socket.on(ELEMENT_EVENT_NAME, exports.socketEventForElement(bs, cache));
+    function addElementScrollEvents(key, map) {
+        if (!opts[key] ||
+            !opts[key].length ||
+            !("querySelectorAll" in document)) {
+            return;
+        }
+        utils.forEach(opts[key], function (selector) {
+            var elems = document.querySelectorAll(selector) || [];
+            utils.forEach(elems, function (elem) {
+                var data = utils.getElementData(elem);
+                data.cacheSelector = data.tagName + ":" + data.index;
+                data.map = map;
+                cache[data.cacheSelector] = elem;
+                eventManager.addEvent(elem, WINDOW_EVENT_NAME, exports.browserEventForElement(bs, elem, data));
+            });
+        });
+    }
 };
 /**
- * Uses event delegation to determine the clicked element
  * @param {BrowserSync} bs
- * @returns {Function}
  */
-exports.browserEvent = function (bs) {
-    return function (event) {
-        if (exports.canEmitEvents) {
-            var elem = event.target || event.srcElement;
-            if (elem.type === "checkbox" || elem.type === "radio") {
-                bs.utils.forceChange(elem);
-                return;
-            }
-            bs.socket.emit(EVENT_NAME, bs.utils.getElementData(elem));
-        }
-        else {
-            exports.canEmitEvents = true;
-        }
-    };
-};
-/**
- * @param {BrowserSync} bs
- * @param {manager} eventManager
- * @returns {Function}
- */
-exports.socketEvent = function (bs, eventManager) {
+exports.socketEvent = function (bs) {
     return function (data) {
-        if (!bs.canSync(data, OPT_PATH) || bs.tabHidden) {
+        if (!bs.canSync(data, OPT_PATH)) {
             return false;
         }
-        var elem = bs.utils.getSingleElement(data.tagName, data.index);
-        if (elem) {
-            exports.canEmitEvents = false;
-            eventManager.triggerClick(elem);
+        var scrollSpace = utils.getScrollSpace();
+        exports.canEmitEvents = false;
+        if (bs.options && bs.options.scrollProportionally) {
+            return window.scrollTo(0, scrollSpace.y * data.position.proportional); // % of y axis of scroll to px
+        }
+        else {
+            return window.scrollTo(0, data.position.raw.y);
         }
     };
 };
-
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-exports.plugins = {
-    inputs: __webpack_require__(29),
-    toggles: __webpack_require__(30),
-    submit: __webpack_require__(31)
-};
 /**
- * Load plugins for enabled options
  * @param bs
  */
-exports.init = function (bs, eventManager) {
-    var checkOpt = true;
-    var options = bs.options.ghostMode.forms;
-    if (options === true) {
-        checkOpt = false;
-    }
-    function init(name) {
-        exports.plugins[name].init(bs, eventManager);
-    }
-    for (var name in exports.plugins) {
-        if (!checkOpt) {
-            init(name);
-        }
-        else {
-            if (options[name]) {
-                init(name);
-            }
-        }
-    }
-};
-
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/**
- * This is the plugin for syncing clicks between browsers
- * @type {string}
- */
-var EVENT_NAME = "input:text";
-var OPT_PATH = "ghostMode.forms.inputs";
-exports.canEmitEvents = true;
-/**
- * @param {BrowserSync} bs
- * @param eventManager
- */
-exports.init = function (bs, eventManager) {
-    eventManager.addEvent(document.body, "keyup", exports.browserEvent(bs));
-    bs.socket.on(EVENT_NAME, exports.socketEvent(bs, eventManager));
-};
-/**
- * @param {BrowserSync} bs
- * @returns {Function}
- */
-exports.browserEvent = function (bs) {
-    return function (event) {
-        var elem = event.target || event.srcElement;
-        var data;
-        if (exports.canEmitEvents) {
-            if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
-                data = bs.utils.getElementData(elem);
-                data.value = elem.value;
-                bs.socket.emit(EVENT_NAME, data);
-            }
-        }
-        else {
-            exports.canEmitEvents = true;
-        }
-    };
-};
-/**
- * @param {BrowserSync} bs
- * @returns {Function}
- */
-exports.socketEvent = function (bs) {
-    return function (data) {
-        if (!bs.canSync(data, OPT_PATH)) {
-            return false;
-        }
-        var elem = bs.utils.getSingleElement(data.tagName, data.index);
-        if (elem) {
-            elem.value = data.value;
-            return elem;
-        }
-        return false;
-    };
-};
-
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/**
- * This is the plugin for syncing clicks between browsers
- * @type {string}
- */
-var EVENT_NAME = "input:toggles";
-var OPT_PATH = "ghostMode.forms.toggles";
-exports.canEmitEvents = true;
-/**
- * @param {BrowserSync} bs
- * @param eventManager
- */
-exports.init = function (bs, eventManager) {
-    var browserEvent = exports.browserEvent(bs);
-    exports.addEvents(eventManager, browserEvent);
-    bs.socket.on(EVENT_NAME, exports.socketEvent(bs, eventManager));
-};
-/**
- * @param eventManager
- * @param event
- */
-exports.addEvents = function (eventManager, event) {
-    var elems = document.getElementsByTagName("select");
-    var inputs = document.getElementsByTagName("input");
-    addEvents(elems);
-    addEvents(inputs);
-    function addEvents(domElems) {
-        for (var i = 0, n = domElems.length; i < n; i += 1) {
-            eventManager.addEvent(domElems[i], "change", event);
-        }
-    }
-};
-/**
- * @param {BrowserSync} bs
- * @returns {Function}
- */
-exports.browserEvent = function (bs) {
-    return function (event) {
-        if (exports.canEmitEvents) {
-            var elem = event.target || event.srcElement;
-            var data;
-            if (elem.type === "radio" ||
-                elem.type === "checkbox" ||
-                elem.tagName === "SELECT") {
-                data = bs.utils.getElementData(elem);
-                data.type = elem.type;
-                data.value = elem.value;
-                data.checked = elem.checked;
-                bs.socket.emit(EVENT_NAME, data);
-            }
-        }
-        else {
-            exports.canEmitEvents = true;
-        }
-    };
-};
-/**
- * @param {BrowserSync} bs
- * @returns {Function}
- */
-exports.socketEvent = function (bs) {
+exports.socketEventForElement = function (bs, cache) {
     return function (data) {
         if (!bs.canSync(data, OPT_PATH)) {
             return false;
         }
         exports.canEmitEvents = false;
-        var elem = bs.utils.getSingleElement(data.tagName, data.index);
-        if (elem) {
-            if (data.type === "radio") {
-                elem.checked = true;
+        function scrollOne(selector, pos) {
+            if (cache[selector]) {
+                cache[selector].scrollTop = pos;
             }
-            if (data.type === "checkbox") {
-                elem.checked = data.checked;
-            }
-            if (data.tagName === "SELECT") {
-                elem.value = data.value;
-            }
-            return elem;
         }
-        return false;
+        if (data.map) {
+            return Object.keys(cache).forEach(function (key) {
+                scrollOne(key, data.position);
+            });
+        }
+        scrollOne(data.elem.cacheSelector, data.position);
     };
 };
-
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 /**
- * This is the plugin for syncing clicks between browsers
- * @type {string}
+ * @param bs
  */
-var EVENT_NAME = "form:submit";
-var OPT_PATH = "ghostMode.forms.submit";
-exports.canEmitEvents = true;
-/**
- * @param {BrowserSync} bs
- * @param eventManager
- */
-exports.init = function (bs, eventManager) {
-    var browserEvent = exports.browserEvent(bs);
-    eventManager.addEvent(document.body, "submit", browserEvent);
-    eventManager.addEvent(document.body, "reset", browserEvent);
-    bs.socket.on(EVENT_NAME, exports.socketEvent(bs, eventManager));
+exports.browserEventForElement = function (bs, elem, data) {
+    return function () {
+        var canSync = exports.canEmitEvents;
+        if (canSync) {
+            bs.socket.emit(ELEMENT_EVENT_NAME, {
+                position: elem.scrollTop,
+                elem: data,
+                map: data.map
+            });
+        }
+        exports.canEmitEvents = true;
+    };
 };
-/**
- * @param {BrowserSync} bs
- * @returns {Function}
- */
 exports.browserEvent = function (bs) {
-    return function (event) {
-        if (exports.canEmitEvents) {
-            var elem = event.target || event.srcElement;
-            var data = bs.utils.getElementData(elem);
-            data.type = event.type;
-            bs.socket.emit(EVENT_NAME, data);
+    return function () {
+        var canSync = exports.canEmitEvents;
+        if (canSync) {
+            bs.socket.emit(WINDOW_EVENT_NAME, {
+                position: exports.getScrollPosition()
+            });
         }
-        else {
-            exports.canEmitEvents = true;
-        }
+        exports.canEmitEvents = true;
     };
 };
 /**
- * @param {BrowserSync} bs
- * @returns {Function}
+ * @returns {{raw: number, proportional: number}}
  */
-exports.socketEvent = function (bs) {
-    return function (data) {
-        if (!bs.canSync(data, OPT_PATH)) {
-            return false;
-        }
-        var elem = bs.utils.getSingleElement(data.tagName, data.index);
-        exports.canEmitEvents = false;
-        if (elem && data.type === "submit") {
-            elem.submit();
-        }
-        if (elem && data.type === "reset") {
-            elem.reset();
-        }
-        return false;
+exports.getScrollPosition = function () {
+    var pos = utils.getBrowserScrollPosition();
+    return {
+        raw: pos,
+        proportional: exports.getScrollTopPercentage(pos) // Get % of y axis of scroll
     };
+};
+/**
+ * @param {{x: number, y: number}} scrollSpace
+ * @param scrollPosition
+ * @returns {{x: number, y: number}}
+ */
+exports.getScrollPercentage = function (scrollSpace, scrollPosition) {
+    var x = scrollPosition.x / scrollSpace.x;
+    var y = scrollPosition.y / scrollSpace.y;
+    return {
+        x: x || 0,
+        y: y
+    };
+};
+/**
+ * Get just the percentage of Y axis of scroll
+ * @returns {number}
+ */
+exports.getScrollTopPercentage = function (pos) {
+    var scrollSpace = utils.getScrollSpace();
+    var percentage = exports.getScrollPercentage(scrollSpace, pos);
+    return percentage.y;
 };
 
 
 /***/ }),
-/* 32 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-/**
- * This is the plugin for syncing location
- * @type {string}
- */
-var EVENT_NAME = "browser:location";
-var OPT_PATH = "ghostMode.location";
-exports.canEmitEvents = true;
-/**
- * @param {BrowserSync} bs
- */
-exports.init = function (bs) {
-    bs.socket.on(EVENT_NAME, exports.socketEvent(bs));
-};
-/**
- * Respond to socket event
- */
-exports.socketEvent = function (bs) {
-    return function (data) {
-        if (!bs.canSync(data, OPT_PATH)) {
-            return false;
-        }
-        if (data.path) {
-            exports.setPath(data.path);
-        }
-        else {
-            exports.setUrl(data.url);
-        }
-    };
-};
-/**
- * @param url
- */
-exports.setUrl = function (url) {
-    window.location = url;
-};
-/**
- * @param path
- */
-exports.setPath = function (path) {
-    window.location =
-        window.location.protocol + "//" + window.location.host + path;
-};
+module.exports = __webpack_require__(25);
 
 
 /***/ }),
-/* 33 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(34);
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var socket = __webpack_require__(13);
-var shims = __webpack_require__(58);
-var notify = __webpack_require__(26);
-var codeSync = __webpack_require__(59);
-var BrowserSync = __webpack_require__(69);
-var ghostMode = __webpack_require__(71);
-var emitter = __webpack_require__(7);
-var events = __webpack_require__(12);
-var utils = __webpack_require__(4);
+///<reference path="types.ts"/>
+var socket = __webpack_require__(26);
+var shims = __webpack_require__(50);
+var notify = __webpack_require__(51);
+var codeSync = __webpack_require__(52);
+var BrowserSync = __webpack_require__(63).BrowserSync;
+var ghostMode = __webpack_require__(64);
+var events = __webpack_require__(10);
+var utils = __webpack_require__(2);
+var mitt = __webpack_require__(71).default;
 var shouldReload = false;
 var initialised = false;
 /**
  * @param options
  */
-exports.init = function (options) {
+function init(options) {
     if (shouldReload && options.reloadOnRestart) {
         utils.reloadBrowser();
     }
     var BS = window.___browserSync___ || {};
+    var emitter = mitt();
     if (!BS.client) {
         BS.client = true;
-        var browserSync = new BrowserSync(options);
-        // Always init on page load
-        ghostMode.init(browserSync);
-        codeSync.init(browserSync);
-        notify.init(browserSync);
-        if (options.notify) {
-            notify.flash("Connected to BrowserSync");
-        }
+        var browserSync = new BrowserSync({ options: options, emitter: emitter, socket: socket });
+        // // Always init on page load
+        // ghostMode.init(browserSync);
+        // codeSync.init(browserSync);
+        //
+        // notify.init(browserSync);
+        //
+        // if (options.notify) {
+        //     notify.flash("Connected to BrowserSync");
+        // }
     }
-    if (!initialised) {
-        socket.on("disconnect", function () {
-            if (options.notify) {
-                notify.flash("Disconnected from BrowserSync");
-            }
-            shouldReload = true;
-        });
-        initialised = true;
-    }
-};
+    // if (!initialised) {
+    //     socket.on("disconnect", function() {
+    //         if (options.notify) {
+    //             notify.flash("Disconnected from BrowserSync");
+    //         }
+    //         shouldReload = true;
+    //     });
+    //     initialised = true;
+    // }
+}
 /**
  * Handle individual socket connections
  */
-socket.on("connection", exports.init);
-/**debug:start**/
-if (window.__karma__) {
-    window.__bs_scroll__ = __webpack_require__(11);
-    window.__bs_clicks__ = __webpack_require__(27);
-    window.__bs_location__ = __webpack_require__(32);
-    window.__bs_inputs__ = __webpack_require__(29);
-    window.__bs_toggles__ = __webpack_require__(30);
-    window.__bs_submit__ = __webpack_require__(31);
-    window.__bs_forms__ = __webpack_require__(28);
-    window.__bs_utils__ = __webpack_require__(4);
-    window.__bs_emitter__ = emitter;
-    window.__bs = BrowserSync;
-    window.__bs_notify__ = notify;
-    window.__bs_code_sync__ = codeSync;
-    window.__bs_ghost_mode__ = ghostMode;
-    window.__bs_socket__ = socket;
-    window.__bs_index__ = exports;
-}
+socket.on("connection", init);
 
 
 /***/ }),
-/* 35 */
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var socket = __webpack_require__(27);
+/**
+ * @type {{emit: emit, on: on}}
+ */
+var socketConfig = window.___browserSync___.socketConfig;
+var socketUrl = window.___browserSync___.socketUrl;
+var io = socket(socketUrl, socketConfig);
+/**
+ * *****BACK-COMPAT*******
+ * Scripts that come after Browsersync may rely on the previous window.___browserSync___.socket
+ */
+window.___browserSync___.socket = io;
+/**
+ * @returns {string}
+ */
+function getPath() {
+    return window.location.pathname;
+}
+exports.getPath = getPath;
+/**
+ * Alias for socket.emit
+ * @param name
+ * @param data
+ */
+function emit(name, data) {
+    if (io && io.emit) {
+        // send relative path of where the event is sent
+        data.url = getPath();
+        io.emit(name, data);
+    }
+}
+exports.emit = emit;
+/**
+ * Alias for socket.on
+ * @param name
+ * @param func
+ */
+function on(name, func) {
+    io.on(name, func);
+}
+exports.on = on;
+
+
+/***/ }),
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -4704,9 +4219,9 @@ if (window.__karma__) {
  * Module dependencies.
  */
 
-var url = __webpack_require__(36);
-var parser = __webpack_require__(8);
-var Manager = __webpack_require__(18);
+var url = __webpack_require__(28);
+var parser = __webpack_require__(7);
+var Manager = __webpack_require__(15);
 var debug = __webpack_require__(1)('socket.io-client');
 
 /**
@@ -4791,12 +4306,12 @@ exports.connect = lookup;
  * @api public
  */
 
-exports.Manager = __webpack_require__(18);
-exports.Socket = __webpack_require__(23);
+exports.Manager = __webpack_require__(15);
+exports.Socket = __webpack_require__(20);
 
 
 /***/ }),
-/* 36 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -4804,7 +4319,7 @@ exports.Socket = __webpack_require__(23);
  * Module dependencies.
  */
 
-var parseuri = __webpack_require__(14);
+var parseuri = __webpack_require__(11);
 var debug = __webpack_require__(1)('socket.io-client:url');
 
 /**
@@ -4878,7 +4393,7 @@ function url (uri, loc) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 37 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -4894,7 +4409,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(38);
+exports.humanize = __webpack_require__(30);
 
 /**
  * The currently active debug mode names, and names to skip.
@@ -5086,7 +4601,7 @@ function coerce(val) {
 
 
 /***/ }),
-/* 38 */
+/* 30 */
 /***/ (function(module, exports) {
 
 /**
@@ -5244,7 +4759,7 @@ function plural(ms, n, name) {
 
 
 /***/ }),
-/* 39 */
+/* 31 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -5255,7 +4770,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 40 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -5264,8 +4779,8 @@ module.exports = Array.isArray || function (arr) {
  * Module requirements
  */
 
-var isArray = __webpack_require__(41);
-var isBuf = __webpack_require__(17);
+var isArray = __webpack_require__(33);
+var isBuf = __webpack_require__(14);
 var toString = Object.prototype.toString;
 var withNativeBlob = typeof global.Blob === 'function' || toString.call(global.Blob) === '[object BlobConstructor]';
 var withNativeFile = typeof global.File === 'function' || toString.call(global.File) === '[object FileConstructor]';
@@ -5403,7 +4918,7 @@ exports.removeBlobs = function(data, callback) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 41 */
+/* 33 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -5414,11 +4929,11 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 42 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-module.exports = __webpack_require__(43);
+module.exports = __webpack_require__(35);
 
 /**
  * Exports parser
@@ -5426,23 +4941,23 @@ module.exports = __webpack_require__(43);
  * @api public
  *
  */
-module.exports.parser = __webpack_require__(3);
+module.exports.parser = __webpack_require__(4);
 
 
 /***/ }),
-/* 43 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies.
  */
 
-var transports = __webpack_require__(19);
-var Emitter = __webpack_require__(2);
+var transports = __webpack_require__(16);
+var Emitter = __webpack_require__(3);
 var debug = __webpack_require__(1)('engine.io-client:socket');
-var index = __webpack_require__(22);
-var parser = __webpack_require__(3);
-var parseuri = __webpack_require__(14);
+var index = __webpack_require__(19);
+var parser = __webpack_require__(4);
+var parseuri = __webpack_require__(11);
 var parseqs = __webpack_require__(5);
 
 /**
@@ -5576,9 +5091,9 @@ Socket.protocol = parser.protocol; // this is an int
  */
 
 Socket.Socket = Socket;
-Socket.Transport = __webpack_require__(10);
-Socket.transports = __webpack_require__(19);
-Socket.parser = __webpack_require__(3);
+Socket.Transport = __webpack_require__(9);
+Socket.transports = __webpack_require__(16);
+Socket.parser = __webpack_require__(4);
 
 /**
  * Creates transport of the given type.
@@ -6180,7 +5695,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 44 */
+/* 36 */
 /***/ (function(module, exports) {
 
 
@@ -6203,16 +5718,16 @@ try {
 
 
 /***/ }),
-/* 45 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module requirements.
  */
 
-var XMLHttpRequest = __webpack_require__(9);
-var Polling = __webpack_require__(20);
-var Emitter = __webpack_require__(2);
+var XMLHttpRequest = __webpack_require__(8);
+var Polling = __webpack_require__(17);
+var Emitter = __webpack_require__(3);
 var inherit = __webpack_require__(6);
 var debug = __webpack_require__(1)('engine.io-client:polling-xhr');
 
@@ -6623,7 +6138,7 @@ function unloadHandler () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 46 */
+/* 38 */
 /***/ (function(module, exports) {
 
 
@@ -6648,7 +6163,7 @@ module.exports = Object.keys || function keys (obj){
 
 
 /***/ }),
-/* 47 */
+/* 39 */
 /***/ (function(module, exports) {
 
 /**
@@ -6683,7 +6198,7 @@ module.exports = function(arraybuffer, start, end) {
 
 
 /***/ }),
-/* 48 */
+/* 40 */
 /***/ (function(module, exports) {
 
 module.exports = after
@@ -6717,7 +6232,7 @@ function noop() {}
 
 
 /***/ }),
-/* 49 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/utf8js v2.1.2 by @mathias */
@@ -6975,10 +6490,10 @@ function noop() {}
 
 }(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50)(module), __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42)(module), __webpack_require__(0)))
 
 /***/ }),
-/* 50 */
+/* 42 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -7006,7 +6521,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 51 */
+/* 43 */
 /***/ (function(module, exports) {
 
 /*
@@ -7079,7 +6594,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 52 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
@@ -7182,7 +6697,7 @@ module.exports = (function() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 53 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -7190,7 +6705,7 @@ module.exports = (function() {
  * Module requirements.
  */
 
-var Polling = __webpack_require__(20);
+var Polling = __webpack_require__(17);
 var inherit = __webpack_require__(6);
 
 /**
@@ -7420,24 +6935,24 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 54 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(10);
-var parser = __webpack_require__(3);
+var Transport = __webpack_require__(9);
+var parser = __webpack_require__(4);
 var parseqs = __webpack_require__(5);
 var inherit = __webpack_require__(6);
-var yeast = __webpack_require__(21);
+var yeast = __webpack_require__(18);
 var debug = __webpack_require__(1)('engine.io-client:websocket');
 var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 var NodeWebSocket;
 if (typeof window === 'undefined') {
   try {
-    NodeWebSocket = __webpack_require__(55);
+    NodeWebSocket = __webpack_require__(47);
   } catch (e) { }
 }
 
@@ -7713,13 +7228,13 @@ WS.prototype.check = function () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 55 */
+/* 47 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 56 */
+/* 48 */
 /***/ (function(module, exports) {
 
 module.exports = toArray
@@ -7738,7 +7253,7 @@ function toArray(list, index) {
 
 
 /***/ }),
-/* 57 */
+/* 49 */
 /***/ (function(module, exports) {
 
 
@@ -7829,7 +7344,7 @@ Backoff.prototype.setJitter = function(jitter){
 
 
 /***/ }),
-/* 58 */
+/* 50 */
 /***/ (function(module, exports) {
 
 if (!("indexOf" in Array.prototype)) {
@@ -7954,7 +7469,118 @@ if (!Array.prototype.filter) {
 
 
 /***/ }),
-/* 59 */
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var scroll = __webpack_require__(23);
+var utils = __webpack_require__(2);
+var styles = {
+    display: "none",
+    padding: "15px",
+    fontFamily: "sans-serif",
+    position: "fixed",
+    fontSize: "0.9em",
+    zIndex: 9999,
+    right: 0,
+    top: 0,
+    borderBottomLeftRadius: "5px",
+    backgroundColor: "#1B2032",
+    margin: 0,
+    color: "white",
+    textAlign: "center",
+    pointerEvents: "none"
+};
+var elem;
+var options;
+var timeoutInt;
+/**
+ * @param {BrowserSync} bs
+ * @returns {*}
+ */
+exports.init = function (bs) {
+    options = bs.options;
+    var cssStyles = styles;
+    if (options.notify.styles) {
+        if (Object.prototype.toString.call(options.notify.styles) ===
+            "[object Array]") {
+            // handle original array behavior, replace all styles with a joined copy
+            cssStyles = options.notify.styles.join(";");
+        }
+        else {
+            for (var key in options.notify.styles) {
+                if (options.notify.styles.hasOwnProperty(key)) {
+                    cssStyles[key] = options.notify.styles[key];
+                }
+            }
+        }
+    }
+    elem = document.createElement("DIV");
+    elem.id = "__bs_notify__";
+    if (typeof cssStyles === "string") {
+        elem.style.cssText = cssStyles;
+    }
+    else {
+        for (var rule in cssStyles) {
+            elem.style[rule] = cssStyles[rule];
+        }
+    }
+    var flashFn = exports.watchEvent(bs);
+    bs.emitter.on("notify", flashFn);
+    bs.socket.on("browser:notify", flashFn);
+    return elem;
+};
+/**
+ * @returns {Function}
+ */
+exports.watchEvent = function (bs) {
+    return function (data) {
+        if (bs.options.notify || data.override) {
+            if (typeof data === "string") {
+                return exports.flash(data);
+            }
+            exports.flash(data.message, data.timeout);
+        }
+    };
+};
+/**
+ *
+ */
+exports.getElem = function () {
+    return elem;
+};
+/**
+ * @param message
+ * @param [timeout]
+ * @returns {*}
+ */
+exports.flash = function (message, timeout) {
+    var elem = exports.getElem();
+    var $body = utils.getBody();
+    // return if notify was never initialised
+    if (!elem) {
+        return false;
+    }
+    elem.innerHTML = message;
+    elem.style.display = "block";
+    $body.appendChild(elem);
+    if (timeoutInt) {
+        clearTimeout(timeoutInt);
+        timeoutInt = undefined;
+    }
+    timeoutInt = window.setTimeout(function () {
+        elem.style.display = "none";
+        if (elem.parentNode) {
+            $body.removeChild(elem);
+        }
+    }, timeout || 2000);
+    return elem;
+};
+
+
+/***/ }),
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7968,13 +7594,13 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Reloader_1 = __webpack_require__(60);
-var Timer_1 = __webpack_require__(62);
-var events = __webpack_require__(12);
-var utils = __webpack_require__(4);
-var emitter = __webpack_require__(7);
+var Reloader_1 = __webpack_require__(53);
+var Timer_1 = __webpack_require__(55);
+var events = __webpack_require__(10);
+var utils = __webpack_require__(2);
+var emitter = __webpack_require__(56);
 var sync = exports;
-var nanlogger = __webpack_require__(63);
+var nanlogger = __webpack_require__(57);
 var log = nanlogger("Browsersync", { colors: { magenta: "#0F2634" } });
 var reloader = new Reloader_1.Reloader(window, log, Timer_1.Timer);
 var options = {
@@ -8145,7 +7771,7 @@ sync.reloadBrowser = function (confirm) {
 
 
 /***/ }),
-/* 60 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8157,7 +7783,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * :) :) :)
  *
  */
-var utils_1 = __webpack_require__(61);
+var utils_1 = __webpack_require__(54);
 var hiddenElem;
 var IMAGE_STYLES = [
     { selector: 'background', styleNames: ['backgroundImage'] },
@@ -8591,7 +8217,7 @@ exports.Reloader = Reloader;
 
 
 /***/ }),
-/* 61 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8705,7 +8331,7 @@ exports.updateSearch = updateSearch;
 
 
 /***/ }),
-/* 62 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8751,11 +8377,49 @@ exports.Timer = Timer;
 
 
 /***/ }),
-/* 63 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assert = __webpack_require__(64)
-var xtend = __webpack_require__(68)
+"use strict";
+
+exports.events = {};
+/**
+ * @param name
+ * @param data
+ */
+exports.emit = function (name, data) {
+    var event = exports.events[name];
+    var listeners;
+    if (event && event.listeners) {
+        listeners = event.listeners;
+        for (var i = 0, n = listeners.length; i < n; i += 1) {
+            listeners[i](data);
+        }
+    }
+};
+/**
+ * @param name
+ * @param func
+ */
+exports.on = function (name, func) {
+    var events = exports.events;
+    if (!events[name]) {
+        events[name] = {
+            listeners: [func]
+        };
+    }
+    else {
+        events[name].listeners.push(func);
+    }
+};
+
+
+/***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var assert = __webpack_require__(58)
+var xtend = __webpack_require__(62)
 
 var emojis = {
   trace: '🔍',
@@ -8921,7 +8585,7 @@ function pad (str) {
 
 
 /***/ }),
-/* 64 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8993,7 +8657,7 @@ function isBuffer(b) {
 // ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var util = __webpack_require__(65);
+var util = __webpack_require__(59);
 var hasOwn = Object.prototype.hasOwnProperty;
 var pSlice = Array.prototype.slice;
 var functionsHaveNames = (function () {
@@ -9419,7 +9083,7 @@ var objectKeys = Object.keys || function (obj) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 65 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -9947,7 +9611,7 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-exports.isBuffer = __webpack_require__(66);
+exports.isBuffer = __webpack_require__(60);
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
@@ -9991,7 +9655,7 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = __webpack_require__(67);
+exports.inherits = __webpack_require__(61);
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
@@ -10009,10 +9673,10 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(15)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(12)))
 
 /***/ }),
-/* 66 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = function isBuffer(arg) {
@@ -10023,7 +9687,7 @@ module.exports = function isBuffer(arg) {
 }
 
 /***/ }),
-/* 67 */
+/* 61 */
 /***/ (function(module, exports) {
 
 if (typeof Object.create === 'function') {
@@ -10052,7 +9716,7 @@ if (typeof Object.create === 'function') {
 
 
 /***/ }),
-/* 68 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = extend
@@ -10077,161 +9741,90 @@ function extend() {
 
 
 /***/ }),
-/* 69 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var socket = __webpack_require__(13);
-var emitter = __webpack_require__(7);
-var notify = __webpack_require__(26);
-var tab = __webpack_require__(70);
-var utils = __webpack_require__(4);
+Object.defineProperty(exports, "__esModule", { value: true });
+var browser_utils_1 = __webpack_require__(2);
 /**
  * @constructor
  */
-var BrowserSync = function (options) {
-    this.options = options;
-    this.socket = socket;
-    this.emitter = emitter;
-    this.utils = utils;
-    this.tabHidden = false;
-    var bs = this;
+var BrowserSync = /** @class */ (function () {
+    function BrowserSync(init) {
+        var _this = this;
+        this.init = init;
+        this.tabHidden = false;
+        this.socket = init.socket;
+        this.emitter = init.emitter;
+        this.options = init.options;
+        /**
+         * Options set
+         */
+        this.socket.on("options:set", function (data) {
+            _this.emitter.emit("notify", "Setting options...");
+            _this.options = data.options;
+        });
+        this.emitter.on("tab:hidden", function () {
+            _this.tabHidden = true;
+        });
+        this.emitter.on("tab:visible", function () {
+            _this.tabHidden = false;
+        });
+    }
     /**
-     * Options set
+     * Helper to check if syncing is allowed
+     * @param data
+     * @param optPath
+     * @returns {boolean}
      */
-    socket.on("options:set", function (data) {
-        emitter.emit("notify", "Setting options...");
-        bs.options = data.options;
-    });
-    emitter.on("tab:hidden", function () {
-        bs.tabHidden = true;
-    });
-    emitter.on("tab:visible", function () {
-        bs.tabHidden = false;
-    });
-};
-/**
- * Helper to check if syncing is allowed
- * @param data
- * @param optPath
- * @returns {boolean}
- */
-BrowserSync.prototype.canSync = function (data, optPath) {
-    data = data || {};
-    if (data.override) {
-        return true;
-    }
-    var canSync = true;
-    if (optPath) {
-        canSync = this.getOption(optPath);
-    }
-    return canSync && data.url === window.location.pathname;
-};
-/**
- * Helper to check if syncing is allowed
- * @returns {boolean}
- */
-BrowserSync.prototype.getOption = function (path) {
-    if (path && path.match(/\./)) {
-        return getByPath(this.options, path);
-    }
-    else {
-        var opt = this.options[path];
-        if (isUndefined(opt)) {
-            return false;
+    BrowserSync.prototype.canSync = function (data, optPath) {
+        data = data || {};
+        if (data.override) {
+            return true;
+        }
+        var canSync = true;
+        if (optPath) {
+            canSync = this.getOption(optPath);
+        }
+        return canSync && data.url === window.location.pathname;
+    };
+    /**
+     * Helper to check if syncing is allowed
+     * @returns {boolean}
+     */
+    BrowserSync.prototype.getOption = function (path) {
+        if (path && path.match(/\./)) {
+            return browser_utils_1.getByPath(this.options, path);
         }
         else {
-            return opt;
+            var opt = this.options[path];
+            if (browser_utils_1.isUndefined(opt)) {
+                return false;
+            }
+            else {
+                return opt;
+            }
         }
-    }
-};
-/**
- * @type {Function}
- */
-module.exports = BrowserSync;
-/**
- * @param {String} val
- * @returns {boolean}
- */
-function isUndefined(val) {
-    return "undefined" === typeof val;
-}
-/**
- * @param obj
- * @param path
- */
-function getByPath(obj, path) {
-    for (var i = 0, tempPath = path.split("."), len = tempPath.length; i < len; i++) {
-        if (!obj || typeof obj !== "object") {
-            return false;
-        }
-        obj = obj[tempPath[i]];
-    }
-    if (typeof obj === "undefined") {
-        return false;
-    }
-    return obj;
-}
+    };
+    return BrowserSync;
+}());
+exports.BrowserSync = BrowserSync;
 
 
 /***/ }),
-/* 70 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var utils = __webpack_require__(4);
-var emitter = __webpack_require__(7);
-var $document = utils.getDocument();
-// Set the name of the hidden property and the change event for visibility
-var hidden, visibilityChange;
-if (typeof $document.hidden !== "undefined") {
-    // Opera 12.10 and Firefox 18 and later support
-    hidden = "hidden";
-    visibilityChange = "visibilitychange";
-}
-else if (typeof $document.mozHidden !== "undefined") {
-    hidden = "mozHidden";
-    visibilityChange = "mozvisibilitychange";
-}
-else if (typeof $document.msHidden !== "undefined") {
-    hidden = "msHidden";
-    visibilityChange = "msvisibilitychange";
-}
-else if (typeof $document.webkitHidden !== "undefined") {
-    hidden = "webkitHidden";
-    visibilityChange = "webkitvisibilitychange";
-}
-// If the page is hidden, pause the video;
-// if the page is shown, play the video
-function handleVisibilityChange() {
-    if ($document[hidden]) {
-        emitter.emit("tab:hidden");
-    }
-    else {
-        emitter.emit("tab:visible");
-    }
-}
-if (typeof $document.addEventListener === "undefined" ||
-    typeof $document[hidden] === "undefined") {
-    //console.log('not supported');
-}
-else {
-    $document.addEventListener(visibilityChange, handleVisibilityChange, false);
-}
-
-
-/***/ }),
-/* 71 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var eventManager = __webpack_require__(12).manager;
+var eventManager = __webpack_require__(10).manager;
 exports.plugins = {
-    scroll: __webpack_require__(11),
-    clicks: __webpack_require__(27),
-    forms: __webpack_require__(28),
-    location: __webpack_require__(32)
+    scroll: __webpack_require__(23),
+    clicks: __webpack_require__(65),
+    forms: __webpack_require__(66),
+    location: __webpack_require__(70)
 };
 /**
  * Load plugins for enabled options
@@ -10244,6 +9837,432 @@ exports.init = function (bs) {
         }
     }
 };
+
+
+/***/ }),
+/* 65 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _a = __webpack_require__(2), getElementData = _a.getElementData, getSingleElement = _a.getSingleElement, forceChange = _a.forceChange;
+/**
+ * This is the plugin for syncing clicks between browsers
+ * @type {string}
+ */
+var EVENT_NAME = "click";
+var OPT_PATH = "ghostMode.clicks";
+exports.canEmitEvents = true;
+/**
+ * @param {BrowserSync} bs
+ * @param eventManager
+ */
+exports.init = function (bs, eventManager) {
+    eventManager.addEvent(document.body, EVENT_NAME, exports.browserEvent(bs));
+    bs.socket.on(EVENT_NAME, exports.socketEvent(bs, eventManager));
+};
+/**
+ * Uses event delegation to determine the clicked element
+ * @param {BrowserSync} bs
+ * @returns {Function}
+ */
+exports.browserEvent = function (bs) {
+    return function (event) {
+        if (exports.canEmitEvents) {
+            var elem = event.target || event.srcElement;
+            if (elem.type === "checkbox" || elem.type === "radio") {
+                forceChange(elem);
+                return;
+            }
+            bs.socket.emit(EVENT_NAME, getElementData(elem));
+        }
+        else {
+            exports.canEmitEvents = true;
+        }
+    };
+};
+/**
+ * @param {BrowserSync} bs
+ * @param {manager} eventManager
+ * @returns {Function}
+ */
+exports.socketEvent = function (bs, eventManager) {
+    return function (data) {
+        if (!bs.canSync(data, OPT_PATH) || bs.tabHidden) {
+            return false;
+        }
+        var elem = getSingleElement(data.tagName, data.index);
+        if (elem) {
+            exports.canEmitEvents = false;
+            eventManager.triggerClick(elem);
+        }
+    };
+};
+
+
+/***/ }),
+/* 66 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.plugins = {
+    inputs: __webpack_require__(67),
+    toggles: __webpack_require__(68),
+    submit: __webpack_require__(69)
+};
+/**
+ * Load plugins for enabled options
+ * @param bs
+ */
+exports.init = function (bs, eventManager) {
+    var checkOpt = true;
+    var options = bs.options.ghostMode.forms;
+    if (options === true) {
+        checkOpt = false;
+    }
+    function init(name) {
+        exports.plugins[name].init(bs, eventManager);
+    }
+    for (var name in exports.plugins) {
+        if (!checkOpt) {
+            init(name);
+        }
+        else {
+            if (options[name]) {
+                init(name);
+            }
+        }
+    }
+};
+
+
+/***/ }),
+/* 67 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _a = __webpack_require__(2), getElementData = _a.getElementData, getSingleElement = _a.getSingleElement;
+/**
+ * This is the plugin for syncing clicks between browsers
+ * @type {string}
+ */
+var EVENT_NAME = "input:text";
+var OPT_PATH = "ghostMode.forms.inputs";
+exports.canEmitEvents = true;
+/**
+ * @param {BrowserSync} bs
+ * @param eventManager
+ */
+exports.init = function (bs, eventManager) {
+    eventManager.addEvent(document.body, "keyup", exports.browserEvent(bs));
+    bs.socket.on(EVENT_NAME, exports.socketEvent(bs, eventManager));
+};
+/**
+ * @param {BrowserSync} bs
+ * @returns {Function}
+ */
+exports.browserEvent = function (bs) {
+    return function (event) {
+        var elem = event.target || event.srcElement;
+        var data;
+        if (exports.canEmitEvents) {
+            if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
+                data = getElementData(elem);
+                data.value = elem.value;
+                bs.socket.emit(EVENT_NAME, data);
+            }
+        }
+        else {
+            exports.canEmitEvents = true;
+        }
+    };
+};
+/**
+ * @param {BrowserSync} bs
+ * @returns {Function}
+ */
+exports.socketEvent = function (bs) {
+    return function (data) {
+        if (!bs.canSync(data, OPT_PATH)) {
+            return false;
+        }
+        var elem = getSingleElement(data.tagName, data.index);
+        if (elem) {
+            elem.value = data.value;
+            return elem;
+        }
+        return false;
+    };
+};
+
+
+/***/ }),
+/* 68 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _a = __webpack_require__(2), getElementData = _a.getElementData, getSingleElement = _a.getSingleElement;
+/**
+ * This is the plugin for syncing clicks between browsers
+ * @type {string}
+ */
+var EVENT_NAME = "input:toggles";
+var OPT_PATH = "ghostMode.forms.toggles";
+exports.canEmitEvents = true;
+/**
+ * @param {BrowserSync} bs
+ * @param eventManager
+ */
+exports.init = function (bs, eventManager) {
+    var browserEvent = exports.browserEvent(bs);
+    exports.addEvents(eventManager, browserEvent);
+    bs.socket.on(EVENT_NAME, exports.socketEvent(bs, eventManager));
+};
+/**
+ * @param eventManager
+ * @param event
+ */
+exports.addEvents = function (eventManager, event) {
+    var elems = document.getElementsByTagName("select");
+    var inputs = document.getElementsByTagName("input");
+    addEvents(elems);
+    addEvents(inputs);
+    function addEvents(domElems) {
+        for (var i = 0, n = domElems.length; i < n; i += 1) {
+            eventManager.addEvent(domElems[i], "change", event);
+        }
+    }
+};
+/**
+ * @param {BrowserSync} bs
+ * @returns {Function}
+ */
+exports.browserEvent = function (bs) {
+    return function (event) {
+        if (exports.canEmitEvents) {
+            var elem = event.target || event.srcElement;
+            var data;
+            if (elem.type === "radio" ||
+                elem.type === "checkbox" ||
+                elem.tagName === "SELECT") {
+                data = getElementData(elem);
+                data.type = elem.type;
+                data.value = elem.value;
+                data.checked = elem.checked;
+                bs.socket.emit(EVENT_NAME, data);
+            }
+        }
+        else {
+            exports.canEmitEvents = true;
+        }
+    };
+};
+/**
+ * @param {BrowserSync} bs
+ * @returns {Function}
+ */
+exports.socketEvent = function (bs) {
+    return function (data) {
+        if (!bs.canSync(data, OPT_PATH)) {
+            return false;
+        }
+        exports.canEmitEvents = false;
+        var elem = getSingleElement(data.tagName, data.index);
+        if (elem) {
+            if (data.type === "radio") {
+                elem.checked = true;
+            }
+            if (data.type === "checkbox") {
+                elem.checked = data.checked;
+            }
+            if (data.tagName === "SELECT") {
+                elem.value = data.value;
+            }
+            return elem;
+        }
+        return false;
+    };
+};
+
+
+/***/ }),
+/* 69 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _a = __webpack_require__(2), getElementData = _a.getElementData, getSingleElement = _a.getSingleElement;
+/**
+ * This is the plugin for syncing clicks between browsers
+ * @type {string}
+ */
+var EVENT_NAME = "form:submit";
+var OPT_PATH = "ghostMode.forms.submit";
+exports.canEmitEvents = true;
+/**
+ * @param {BrowserSync} bs
+ * @param eventManager
+ */
+exports.init = function (bs, eventManager) {
+    var browserEvent = exports.browserEvent(bs);
+    eventManager.addEvent(document.body, "submit", browserEvent);
+    eventManager.addEvent(document.body, "reset", browserEvent);
+    bs.socket.on(EVENT_NAME, exports.socketEvent(bs, eventManager));
+};
+/**
+ * @param {BrowserSync} bs
+ * @returns {Function}
+ */
+exports.browserEvent = function (bs) {
+    return function (event) {
+        if (exports.canEmitEvents) {
+            var elem = event.target || event.srcElement;
+            var data = getElementData(elem);
+            data.type = event.type;
+            bs.socket.emit(EVENT_NAME, data);
+        }
+        else {
+            exports.canEmitEvents = true;
+        }
+    };
+};
+/**
+ * @param {BrowserSync} bs
+ * @returns {Function}
+ */
+exports.socketEvent = function (bs) {
+    return function (data) {
+        if (!bs.canSync(data, OPT_PATH)) {
+            return false;
+        }
+        var elem = getSingleElement(data.tagName, data.index);
+        exports.canEmitEvents = false;
+        if (elem && data.type === "submit") {
+            elem.submit();
+        }
+        if (elem && data.type === "reset") {
+            elem.reset();
+        }
+        return false;
+    };
+};
+
+
+/***/ }),
+/* 70 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/**
+ * This is the plugin for syncing location
+ * @type {string}
+ */
+var EVENT_NAME = "browser:location";
+var OPT_PATH = "ghostMode.location";
+exports.canEmitEvents = true;
+/**
+ * @param {BrowserSync} bs
+ */
+exports.init = function (bs) {
+    bs.socket.on(EVENT_NAME, exports.socketEvent(bs));
+};
+/**
+ * Respond to socket event
+ */
+exports.socketEvent = function (bs) {
+    return function (data) {
+        if (!bs.canSync(data, OPT_PATH)) {
+            return false;
+        }
+        if (data.path) {
+            exports.setPath(data.path);
+        }
+        else {
+            exports.setUrl(data.url);
+        }
+    };
+};
+/**
+ * @param url
+ */
+exports.setUrl = function (url) {
+    window.location = url;
+};
+/**
+ * @param path
+ */
+exports.setPath = function (path) {
+    window.location =
+        window.location.protocol + "//" + window.location.host + path;
+};
+
+
+/***/ }),
+/* 71 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//      
+// An event handler can take an optional event argument
+// and should not return a value
+                                          
+                                                               
+
+// An array of all currently registered event handlers for a type
+                                            
+                                                            
+// A map of event types and their corresponding event handlers.
+                        
+                                 
+                                   
+  
+
+/** Mitt: Tiny (~200b) functional event emitter / pubsub.
+ *  @name mitt
+ *  @returns {Mitt}
+ */
+function mitt(all                 ) {
+	all = all || Object.create(null);
+
+	return {
+		/**
+		 * Register an event handler for the given type.
+		 *
+		 * @param  {String} type	Type of event to listen for, or `"*"` for all events
+		 * @param  {Function} handler Function to call in response to given event
+		 * @memberOf mitt
+		 */
+		on: function on(type        , handler              ) {
+			(all[type] || (all[type] = [])).push(handler);
+		},
+
+		/**
+		 * Remove an event handler for the given type.
+		 *
+		 * @param  {String} type	Type of event to unregister `handler` from, or `"*"`
+		 * @param  {Function} handler Handler function to remove
+		 * @memberOf mitt
+		 */
+		off: function off(type        , handler              ) {
+			if (all[type]) {
+				all[type].splice(all[type].indexOf(handler) >>> 0, 1);
+			}
+		},
+
+		/**
+		 * Invoke all handlers for the given type.
+		 * If present, `"*"` handlers are invoked after type-matched handlers.
+		 *
+		 * @param {String} type  The event type to invoke
+		 * @param {Any} [evt]  Any value (object is recommended and powerful), passed to each handler
+		 * @memberOf mitt
+		 */
+		emit: function emit(type        , evt     ) {
+			(all[type] || []).slice().map(function (handler) { handler(evt); });
+			(all['*'] || []).slice().map(function (handler) { handler(type, evt); });
+		}
+	};
+}
+
+/* harmony default export */ __webpack_exports__["default"] = (mitt);
+//# sourceMappingURL=mitt.es.js.map
 
 
 /***/ })

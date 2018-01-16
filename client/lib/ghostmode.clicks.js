@@ -1,4 +1,8 @@
-const {getElementData, getSingleElement, forceChange} = require('./browser.utils');
+const {
+    getElementData,
+    getSingleElement,
+    forceChange
+} = require("./browser.utils");
 
 /**
  * This is the plugin for syncing clicks between browsers

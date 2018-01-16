@@ -4,12 +4,12 @@ var socket = require("./socket");
 var shims = require("./client-shims");
 var notify = require("./notify");
 var codeSync = require("./code-sync");
-const {BrowserSync} = require("./browser-sync");
+const { BrowserSync } = require("./browser-sync");
 var ghostMode = require("./ghostmode");
 var events = require("./events");
 var utils = require("./browser.utils");
 
-const mitt = require('mitt').default;
+const mitt = require("mitt").default;
 
 var shouldReload = false;
 var initialised = false;
@@ -28,7 +28,7 @@ function init(options: bs.InitOptions) {
     if (!BS.client) {
         BS.client = true;
 
-        var browserSync = new BrowserSync({options, emitter, socket});
+        var browserSync = new BrowserSync({ options, emitter, socket });
 
         // // Always init on page load
         // ghostMode.init(browserSync);

@@ -68,8 +68,7 @@ namespace bs {
     interface IRule {
         match: IMatch;
     }
-    interface IMatch {
-    }
+    interface IMatch {}
     interface IScriptPaths {
         path: string;
         versioned: string;
@@ -85,7 +84,7 @@ namespace bs {
         local: string;
         external: string;
         ui: string;
-        'ui-external': string;
+        "ui-external": string;
     }
     interface ITagNames {
         jpg: string;
@@ -103,8 +102,7 @@ namespace bs {
         cwd: string;
         ignored: IIgnoredItem[];
     }
-    interface IIgnoredItem {
-    }
+    interface IIgnoredItem {}
     interface IGhostMode {
         clicks: boolean;
         scroll: boolean;

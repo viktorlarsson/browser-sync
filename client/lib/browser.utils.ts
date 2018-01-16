@@ -1,22 +1,22 @@
 /**
  * @returns {window}
  */
-export function getWindow () {
+export function getWindow() {
     return window;
-};
+}
 
 /**
  * @returns {HTMLDocument}
  */
-export function getDocument () {
+export function getDocument() {
     return document;
-};
+}
 
 /**
  * Get the current x/y position crossbow
  * @returns {{x: *, y: *}}
  */
-export function getBrowserScrollPosition () {
+export function getBrowserScrollPosition() {
     var $window = getWindow();
     var $document = getDocument();
     var scrollX;
@@ -36,7 +36,7 @@ export function getBrowserScrollPosition () {
         x: scrollX,
         y: scrollY
     };
-};
+}
 
 /**
  * @returns {{x: number, y: number}}
@@ -49,7 +49,7 @@ export function getScrollSpace() {
         x: dBody.scrollHeight - dElement.clientWidth,
         y: dBody.scrollHeight - dElement.clientHeight
     };
-};
+}
 
 /**
  * Saves scroll position into cookies
@@ -57,12 +57,12 @@ export function getScrollSpace() {
 export function saveScrollPosition() {
     const pos = getBrowserScrollPosition();
     getDocument().cookie = "bs_scroll_pos=" + [pos.x, pos.y].join(",");
-};
+}
 
 /**
  * Restores scroll position from cookies
  */
-export function restoreScrollPosition () {
+export function restoreScrollPosition() {
     const pos = getDocument()
         .cookie.replace(
             /(?:(?:^|.*;\s*)bs_scroll_pos\s*\=\s*([^;]*).*$)|^.*$/,
@@ -70,7 +70,7 @@ export function restoreScrollPosition () {
         )
         .split(",");
     getWindow().scrollTo(Number(pos[0]), Number(pos[1]));
-};
+}
 
 /**
  * @param tagName
@@ -80,7 +80,7 @@ export function restoreScrollPosition () {
 export function getElementIndex(tagName, elem) {
     var allElems = getDocument().getElementsByTagName(tagName);
     return Array.prototype.indexOf.call(allElems, elem);
-};
+}
 
 /**
  * Force Change event on radio & checkboxes (IE)
@@ -88,7 +88,7 @@ export function getElementIndex(tagName, elem) {
 export function forceChange(elem) {
     elem.blur();
     elem.focus();
-};
+}
 
 /**
  * @param elem
@@ -101,37 +101,37 @@ export function getElementData(elem) {
         tagName: tagName,
         index: index
     };
-};
+}
 
 /**
  * @param {string} tagName
  * @param {number} index
  */
-export function getSingleElement (tagName, index) {
+export function getSingleElement(tagName, index) {
     var elems = getDocument().getElementsByTagName(tagName);
     return elems[index];
-};
+}
 
 /**
  * Get the body element
  */
-export function getBody () {
+export function getBody() {
     return getDocument().getElementsByTagName("body")[0];
-};
+}
 
 /**
  * @param {{x: number, y: number}} pos
  */
 export function setScroll(pos) {
     getWindow().scrollTo(pos.x, pos.y);
-};
+}
 
 /**
  * Hard reload
  */
 export function reloadBrowser() {
     getWindow().location.reload(true);
-};
+}
 
 /**
  * Foreach polyfill
@@ -142,7 +142,7 @@ export function forEach(coll, fn) {
     for (var i = 0, n = coll.length; i < n; i += 1) {
         fn(coll[i], i, coll);
     }
-};
+}
 
 /**
  * Are we dealing with old IE?
@@ -150,7 +150,7 @@ export function forEach(coll, fn) {
  */
 export function isOldIe() {
     return typeof getWindow().attachEvent !== "undefined";
-};
+}
 
 /**
  * Split the URL information
@@ -174,8 +174,6 @@ export function getLocation(url) {
 export function isUndefined(val) {
     return "undefined" === typeof val;
 }
-
-
 
 /**
  * @param obj
