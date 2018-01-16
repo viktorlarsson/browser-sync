@@ -41,36 +41,38 @@ export class BrowserSync {
      * @param optPath
      * @returns {boolean}
      */
-    canSync(data, optPath) {
-        data = data || {};
+}
 
-        if (data.override) {
-            return true;
-        }
+export function canSync(data, optPath: string|string[], options: IBrowserSyncOptions, location: Location) {
+    data = data || {};
 
-        var canSync = true;
-
-        if (optPath) {
-            canSync = this.getOption(optPath);
-        }
-
-        return canSync && data.url === window.location.pathname;
+    if (data.override) {
+        return true;
     }
-    /**
-     * Helper to check if syncing is allowed
-     * @returns {boolean}
-     */
-    public getOption(path) {
-        if (path && path.match(/\./)) {
-            return getByPath(this.options, path);
-        } else {
-            var opt = this.options[path];
 
-            if (isUndefined(opt)) {
-                return false;
-            } else {
-                return opt;
-            }
-        }
+    var canSync = true;
+
+    if (optPath) {
+        canSync = getOption(optPath, options);
     }
+
+    return canSync && data.url === location.pathname;
+}
+/**
+ * Helper to check if syncing is allowed
+ * @returns {boolean}
+ */
+export function getOption(path, options) {
+
+    if (path && path.match(/\./)) {
+        return getByPath(options, path);
+    }
+
+    var opt = options[path];
+
+    if (isUndefined(opt)) {
+        return false;
+    }
+
+    return opt;
 }

@@ -15,6 +15,9 @@ tasks:
     - '@npm cd client && ./node_modules/.bin/webpack'
     - '@npm cd client && ./node_modules/.bin/webpack -p --output-filename index.min.js'
 
+  dev:
+    - '@npm cd client && ./node_modules/.bin/webpack --watch'
+
   lint: >
     @npm prettier
     lib/**/*

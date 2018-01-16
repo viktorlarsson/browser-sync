@@ -1,5 +1,6 @@
-import { Reloader } from "../vendor/Reloader";
+// import { Reloader } from "../vendor/Reloader";
 import { Timer } from "../vendor/Timer";
+import {reload} from "../vendor/Reloader";
 
 const events = require("./events");
 const utils = require("./browser.utils");
@@ -7,7 +8,7 @@ const emitter = require("./emitter");
 const sync = exports;
 const nanlogger = require("nanologger");
 const log = nanlogger("Browsersync", { colors: { magenta: "#0F2634" } });
-const reloader = new Reloader(window, log, Timer);
+// const reloader = new Reloader(window, log, Timer);
 
 const options = {
     tagNames: {
@@ -24,13 +25,13 @@ const options = {
         img: "src",
         script: "src"
     },
-    blacklist: [
-        // never allow .map files through
-        function(incoming) {
-            return incoming.ext === "map";
-        }
-    ]
 };
+const blacklist = [
+// never allow .map files through
+    function(incoming) {
+        return incoming.ext === "map";
+    }
+];
 
 const OPT_PATH = "codeSync";
 const current = function() {
@@ -51,7 +52,7 @@ sync.init = function(bs) {
         sync.saveScrollInCookie(utils.getWindow(), utils.getDocument());
     }
 
-    bs.socket.on("file:reload", sync.reload(bs));
+    // bs.socket.on("file:reload", sync.reload(bs));
     bs.socket.on("browser:reload", function() {
         if (bs.canSync({ url: current() }, OPT_PATH)) {
             sync.reloadBrowser(true, bs);
@@ -106,9 +107,9 @@ sync.saveScrollInName = function() {
      * If the JSON was parsed correctly, try to
      * find a scroll property and restore it.
      */
-    if (saved.bs && saved.bs.hardReload && saved.bs.scroll) {
-        utils.setScroll(saved.bs.scroll);
-    }
+    // if (saved.bs && saved.bs.hardReload && saved.bs.scroll) {
+    //     utils.setScroll(saved.bs.scroll);
+    // }
 
     /**
      * Remove any existing BS json from window.name
@@ -145,39 +146,21 @@ sync.saveScrollInCookie = function($window, $document) {
  * @param {BrowserSync} bs
  * @returns {*}
  */
-sync.reload = function(bs) {
-    /**
-     * @param data - from socket
-     */
-    return function(data) {
-        if (!bs.canSync({ url: current() }, OPT_PATH)) {
-            return;
-        }
-
-        if (data.url || !bs.options.injectChanges) {
-            sync.reloadBrowser(true);
-        }
-
-        if (data.basename && data.ext) {
-            if (sync.isBlacklisted(data)) {
-                return;
-            }
-
-            reloader.reload(data, {
-                ...options,
-                liveCSS: true,
-                liveImg: true
-            });
-        }
-    };
+export function fileReload(event, document) {
+    const timer = Timer;
+    reload(event, {
+        ...options,
+        liveCSS: true,
+        liveImg: true
+    }, document, timer);
 };
 
 /**
  * @param incoming
  * @returns {boolean}
  */
-sync.isBlacklisted = function(incoming) {
-    return options.blacklist.some(function(fn) {
+export function isBlacklisted (incoming) {
+    return blacklist.some(function(fn) {
         return fn(incoming);
     });
 };
