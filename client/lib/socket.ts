@@ -34,6 +34,9 @@ export function initDocument() {
     return Observable.of(document);
 }
 
+export function initNavigator() {
+    return Observable.of(navigator);
+}
 export function initOptions() {
     return new BehaviorSubject(window.___browserSync___.options);
 }

@@ -10,7 +10,7 @@ const nanlogger = require("nanologger");
 const log = nanlogger("Browsersync", { colors: { magenta: "#0F2634" } });
 // const reloader = new Reloader(window, log, Timer);
 
-const options = {
+export const options = {
     tagNames: {
         css: "link",
         jpg: "img",
@@ -26,6 +26,7 @@ const options = {
         script: "src"
     },
 };
+
 const blacklist = [
 // never allow .map files through
     function(incoming) {
@@ -140,19 +141,6 @@ sync.saveScrollInCookie = function($window, $document) {
     }
 
     emitter.on("browser:hardReload", utils.saveScrollPosition);
-};
-
-/**
- * @param {BrowserSync} bs
- * @returns {*}
- */
-export function fileReload(event, document) {
-    const timer = Timer;
-    reload(event, {
-        ...options,
-        liveCSS: true,
-        liveImg: true
-    }, document, timer);
 };
 
 /**

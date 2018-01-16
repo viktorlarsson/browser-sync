@@ -2,20 +2,20 @@
 import {Observable} from 'rxjs';
 import {initDocument, initOptions, initSocket, initWindow} from "./socket";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {canSync} from "./browser-sync";
 import {FileReloadEventPayload} from "../types/socket";
-import {fileReload, isBlacklisted} from "./code-sync";
+import {isBlacklisted, options} from "./code-sync";
 import {reload} from "../vendor/Reloader";
 const nanlogger = require("nanologger");
 const log = nanlogger("Browsersync", { colors: { magenta: "#0F2634" } });
 
-const { of, from, empty } = Observable;
+const { of, empty } = Observable;
 
 interface Inputs {
     window$: Observable<Window>,
     document$: Observable<Document>,
     socket$: Observable<SocketEvent>,
     option$: Observable<IBrowserSyncOptions>,
+    navigator$: Observable<Navigator>,
 }
 
 type EffectStream = Observable<[EffectNames, any]>
@@ -38,16 +38,28 @@ export enum EffectNames {
     SetOptions = '@@SetOptions [e]',
 }
 
+export namespace BSDOM {
+    export enum Events {
+        DOMPropSet = '@@BSDOM.Events.DOMPropSet',
+        DOMStyleSet = '@@BSDOM.Events.DOMStyleSet',
+    }
+    export function propSet(incoming): [Events.DOMPropSet, any] {
+        return [Events.DOMPropSet, incoming];
+    }
+}
+
 const window$ = initWindow();
 const document$ = initDocument();
 const socket$ = initSocket();
 const option$ = initOptions();
+const navigator$ = initOptions();
 
-const inputs = {
+const inputs: Inputs = {
     window$,
     document$,
     socket$,
     option$,
+    navigator$,
 };
 
 const inputHandlers$ = new BehaviorSubject<SocketStreamMapped>({
@@ -88,47 +100,57 @@ const outputHandlers$ = new BehaviorSubject<EffectStreamMapped>({
      * @param inputs
      */
     [EffectNames.FileReload]: (xs, inputs: Inputs) => xs
-        .withLatestFrom(inputs.document$)
-        .do(([event, document]) => {
-            fileReload(event, document);
-        })
-        .ignoreElements(),
+        .withLatestFrom(inputs.document$, inputs.navigator$)
+        .flatMap(([event, document, navigator]) => {
+            return reload(document, navigator)(event, {
+                ...options,
+                liveCSS: true,
+                liveImg: true
+            });
+        }),
     /**
      * Hard reload the browser
      */
     [EffectNames.BrowserReload]: (xs, inputs: Inputs) => xs
         .withLatestFrom(inputs.window$)
-        .do(([, window]) => window.location.reload(true))
+        .do(([, window]) => window.location.reload(true)),
+});
+
+const domHandlers$ = new BehaviorSubject({
+    [BSDOM.Events.DOMPropSet]: (xs) => xs
+        .do(({target, prop, value}) => {
+            target[prop] = value;
+        })
         .ignoreElements(),
-        // .map(x => {
-        //     return {
-        //         type: 'set options',
-        //         payload: x
-        //     }
-        // })
-    // 'file:reload': (xs, inputs) => xs
-    //     .withLatestFrom()
+    [BSDOM.Events.DOMStyleSet]: (xs) => xs
+        .do(({style, styleName, newValue}) => {
+            style[styleName] = newValue;
+        })
+        .ignoreElements()
 });
 
 function getStream(name: string, inputs) {
     return function(handlers$, inputStream$) {
         return inputStream$
             .do(x => {
+                // log.trace(`${name}`, x[0], x[1]);
                 log.trace(`${name}`, x[0], x[1]);
-                log.debug(`${name}`, x[0]);
             })
             .groupBy(([name]) => name)
             .withLatestFrom(handlers$)
             .filter(([x, handlers]) => typeof handlers[x.key] === 'function')
-            .flatMap(([x, handlers]) => handlers[x.key](x.pluck(1), inputs))
+            .flatMap(([x, handlers]) => {
+                return handlers[x.key](x.pluck(1), inputs)
+                    .do(([name, payload]) => log.debug(name, payload))
+            })
     }
 }
 
 const output$ = getStream('[socket]', inputs)(inputHandlers$, inputs.socket$);
-const effect$ = getStream('[effect]', inputs)(outputHandlers$, output$.ignoreElements());
+const effect$ = getStream('[effect]', inputs)(outputHandlers$, output$);
+const dom$    = getStream('[dom-effect]', inputs)(domHandlers$, effect$);
 
-effect$
-    .subscribe();
+dom$.subscribe();
 
 // var socket = require("./socket");
 // var shims = require("./client-shims");
