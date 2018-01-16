@@ -29,6 +29,7 @@ type EffectEvent = [EffectNames] | [EffectNames, any] | EffectNames[];
 export enum SocketNames {
     Connection = 'connection',
     FileReload = 'file:reload',
+    BrowserReload = 'browser:reload',
 }
 
 export enum EffectNames {
@@ -54,8 +55,8 @@ const inputHandlers$ = new BehaviorSubject<SocketStreamMapped>({
         .map(x => {
             return [EffectNames.SetOptions, x]
         }),
-    [SocketNames.FileReload]: (xs, input) => xs
-        .withLatestFrom(input.option$)
+    [SocketNames.FileReload]: (xs, inputs) => xs
+        .withLatestFrom(inputs.option$)
         .filter(([event, options]) => options.codeSync)
         .flatMap(([event, options]): Observable<EffectEvent> => {
             const data: FileReloadEventPayload = event;
@@ -66,7 +67,11 @@ const inputHandlers$ = new BehaviorSubject<SocketStreamMapped>({
                 return empty();
             }
             return of([EffectNames.FileReload, event]);
-        })
+        }),
+    [SocketNames.BrowserReload]: (xs, inputs) => xs
+        .withLatestFrom(inputs.option$)
+        .filter(([event, options]) => options.codeSync)
+        .mapTo([EffectNames.BrowserReload])
 });
 
 const outputHandlers$ = new BehaviorSubject<EffectStreamMapped>({
@@ -108,7 +113,10 @@ const outputHandlers$ = new BehaviorSubject<EffectStreamMapped>({
 function getStream(name: string, inputs) {
     return function(handlers$, inputStream$) {
         return inputStream$
-            .do(x => log.trace(`${name}`, x[0], x[1]))
+            .do(x => {
+                log.trace(`${name}`, x[0], x[1]);
+                log.debug(`${name}`, x[0]);
+            })
             .groupBy(([name]) => name)
             .withLatestFrom(handlers$)
             .filter(([x, handlers]) => typeof handlers[x.key] === 'function')
@@ -117,7 +125,7 @@ function getStream(name: string, inputs) {
 }
 
 const output$ = getStream('[socket]', inputs)(inputHandlers$, inputs.socket$);
-const effect$ = getStream('[effect]', inputs)(outputHandlers$, output$);
+const effect$ = getStream('[effect]', inputs)(outputHandlers$, output$.ignoreElements());
 
 effect$
     .subscribe();
