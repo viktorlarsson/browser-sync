@@ -8,6 +8,12 @@ tasks:
     - build-server
     - build-client
 
+  test:
+    - >
+      @npm node cypress/setup/run.js
+      '../configs/css-injection.js'
+      cypress/integration/css-injection.js
+
   build-server:
     - '@npm tsc'
 

@@ -43,7 +43,12 @@ export class BrowserSync {
      */
 }
 
-export function canSync(data, optPath: string|string[], options: IBrowserSyncOptions, location: Location) {
+export function canSync(
+    data,
+    optPath: string | string[],
+    options: IBrowserSyncOptions,
+    location: Location
+) {
     data = data || {};
 
     if (data.override) {
@@ -63,7 +68,6 @@ export function canSync(data, optPath: string|string[], options: IBrowserSyncOpt
  * @returns {boolean}
  */
 export function getOption(path, options) {
-
     if (path && path.match(/\./)) {
         return getByPath(options, path);
     }

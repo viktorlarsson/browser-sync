@@ -1,6 +1,6 @@
 // import { Reloader } from "../vendor/Reloader";
 import { Timer } from "../vendor/Timer";
-import {reload} from "../vendor/Reloader";
+import { reload } from "../vendor/Reloader";
 
 const events = require("./events");
 const utils = require("./browser.utils");
@@ -24,11 +24,11 @@ export const options = {
         link: "href",
         img: "src",
         script: "src"
-    },
+    }
 };
 
 const blacklist = [
-// never allow .map files through
+    // never allow .map files through
     function(incoming) {
         return incoming.ext === "map";
     }
@@ -147,11 +147,11 @@ sync.saveScrollInCookie = function($window, $document) {
  * @param incoming
  * @returns {boolean}
  */
-export function isBlacklisted (incoming) {
+export function isBlacklisted(incoming) {
     return blacklist.some(function(fn) {
         return fn(incoming);
     });
-};
+}
 
 /**
  * @param confirm

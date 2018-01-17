@@ -1,8 +1,6 @@
 import socket = require("socket.io-client");
-import {Observable} from 'rxjs';
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-
-
+import { Observable } from "rxjs";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
 /**
  * Alias for socket.emit
@@ -42,7 +40,6 @@ export function initOptions() {
 }
 
 export function initSocket() {
-
     // return Observable
 
     /**
@@ -55,8 +52,8 @@ export function initSocket() {
     const onevent = io.onevent;
 
     const on$ = Observable.create(obs => {
-        io.onevent = function (packet) {
-            onevent.call (this, packet);
+        io.onevent = function(packet) {
+            onevent.call(this, packet);
             obs.next(packet.data);
         };
     }).share();

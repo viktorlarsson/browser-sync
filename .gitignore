@@ -20,3 +20,4 @@ after.json
 bs-config.js
 /lodash.custom.min.js
 /dist
+/cypress/videos
