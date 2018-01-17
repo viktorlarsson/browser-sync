@@ -171,7 +171,7 @@ export function reload(document: Document, navigator: Navigator) {
                 ];
             })
             .filter(([style, styleName, value, newValue]) => newValue !== value)
-            .map(([style, styleName, value, newValue]) => [BSDOM.Events.DOMStyleSet, {style, styleName, value, newValue}])
+            .map(([style, styleName, value, newValue]) => [BSDOM.Events.StyleSet, {style, styleName, value, newValue}])
     }
 
     function swapFile(elem, domData, options, document, navigator) {
@@ -240,7 +240,9 @@ export function reload(document: Document, navigator: Navigator) {
             clone = link.cloneNode(false);
         }
 
-        clone.href = generateCacheBustUrl(linkHref(link));
+        const prevHref = link.href;
+        const nextHref = generateCacheBustUrl(linkHref(link));
+        clone.href = nextHref;
 
         // insert the new LINK before the old one
         const parent = link.parentNode;
@@ -268,7 +270,8 @@ export function reload(document: Document, navigator: Navigator) {
                         }
                         link.parentNode.removeChild(link);
                         clone.onreadystatechange = null;
-                    });
+                    })
+                    .mapTo(BSDOM.linkReplace({target: clone, nextHref, prevHref}))
             });
     }
 
@@ -346,7 +349,6 @@ export function reload(document: Document, navigator: Navigator) {
 
     function reloadStylesheet(path: string, document: Document, navigator): Observable<any> {
         // has to be a real array, because DOMNodeList will be modified
-        let link;
         const links = ((() => {
             const result = [];
             [].slice.call(document.getElementsByTagName('link')).forEach(link => {
@@ -357,16 +359,23 @@ export function reload(document: Document, navigator: Navigator) {
             return result;
         })());
 
-        // find all imported stylesheets
+        /**
+         * Find imported style sheets in <style> tags
+         * @type {any[]}
+         */
         const imported = [];
-        for (var style of Array.from(document.getElementsByTagName('style'))) {
+        [].slice.call(document.getElementsByTagName('style')).forEach(style => {
             if (style.sheet) {
                 collectImportedStylesheets(style, style.sheet, imported);
             }
-        }
-        for (link of Array.from(links)) {
+        });
+
+        /**
+         * Find imported style sheets from regular <link> includes
+         */
+        [].slice.call(links).forEach(link => {
             collectImportedStylesheets(link, link.sheet, imported);
-        }
+        });
 
         // handle prefixfree
         // if (this.window.StyleFix && document.querySelectorAll) {
@@ -378,18 +387,14 @@ export function reload(document: Document, navigator: Navigator) {
         // this.logger.debug(`found ${links.length} LINKed stylesheets, ${imported.length} @imported stylesheets`);
         const match = pickBestMatch(path, links.concat(imported), l => pathFromUrl(linkHref(l)));
 
-
         if (match) {
             if (match.object && match.object.rule) {
-                // this.logger.info(`reloading imported stylesheet: ${match.object.href}`);
                 return reattachImportedRule(match.object, document);
-            } else {
-                // this.logger.info(`reloading stylesheet: ${linkHref(match.object)}`);
-                return reattachStylesheetLink(match.object, document, navigator);
             }
+            return reattachStylesheetLink(match.object, document, navigator);
         }
 
-        return Observable.forkJoin(links.map(link => reattachStylesheetLink(link, document, navigator)))
+        return Observable.merge(...links.map(link => reattachStylesheetLink(link, document, navigator)))
     }
 
 

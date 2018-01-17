@@ -33,18 +33,23 @@ export enum SocketNames {
 }
 
 export enum EffectNames {
-    FileReload = '@@FileReload [e]',
-    BrowserReload = '@@BrowserReload [e]',
-    SetOptions = '@@SetOptions [e]',
+    FileReload = '@@FileReload',
+    BrowserReload = '@@BrowserReload',
+    SetOptions = '@@SetOptions',
 }
 
 export namespace BSDOM {
     export enum Events {
-        DOMPropSet = '@@BSDOM.Events.DOMPropSet',
-        DOMStyleSet = '@@BSDOM.Events.DOMStyleSet',
+        PropSet = '@@BSDOM.Events.PropSet',
+        StyleSet = '@@BSDOM.Events.StyleSet',
+        LinkReplace = '@@BSDOM.Events.LinkReplace'
+
     }
-    export function propSet(incoming): [Events.DOMPropSet, any] {
-        return [Events.DOMPropSet, incoming];
+    export function propSet(incoming): [Events.PropSet, any] {
+        return [Events.PropSet, incoming];
+    }
+    export function linkReplace(incoming): [Events.LinkReplace, any] {
+        return [Events.LinkReplace, incoming];
     }
 }
 
@@ -106,7 +111,7 @@ const outputHandlers$ = new BehaviorSubject<EffectStreamMapped>({
                 ...options,
                 liveCSS: true,
                 liveImg: true
-            });
+            })
         }),
     /**
      * Hard reload the browser
@@ -117,37 +122,42 @@ const outputHandlers$ = new BehaviorSubject<EffectStreamMapped>({
 });
 
 const domHandlers$ = new BehaviorSubject({
-    [BSDOM.Events.DOMPropSet]: (xs) => xs
+    [BSDOM.Events.PropSet]: (xs) => xs
         .do(({target, prop, value}) => {
             target[prop] = value;
         })
         .ignoreElements(),
-    [BSDOM.Events.DOMStyleSet]: (xs) => xs
+    [BSDOM.Events.StyleSet]: (xs) => xs
         .do(({style, styleName, newValue}) => {
             style[styleName] = newValue;
         })
-        .ignoreElements()
+        .ignoreElements(),
+    [BSDOM.Events.LinkReplace]: (xs, inputs) => xs
+        .withLatestFrom(inputs.option$)
+        .do(([incoming, options]) => {
+            log.info(`replaced ${incoming.prevHref} with ${incoming.nextHref}`)
+        })
+        // .ignoreElements()
 });
 
 function getStream(name: string, inputs) {
     return function(handlers$, inputStream$) {
         return inputStream$
             .do(x => {
-                // log.trace(`${name}`, x[0], x[1]);
                 log.trace(`${name}`, x[0], x[1]);
+                // log.trace(`${name}`, x[0], x[1]);
             })
             .groupBy(([name]) => name)
             .withLatestFrom(handlers$)
             .filter(([x, handlers]) => typeof handlers[x.key] === 'function')
             .flatMap(([x, handlers]) => {
-                return handlers[x.key](x.pluck(1), inputs)
-                    .do(([name, payload]) => log.debug(name, payload))
+                return handlers[x.key](x.pluck(1), inputs);
             })
     }
 }
 
 const output$ = getStream('[socket]', inputs)(inputHandlers$, inputs.socket$);
-const effect$ = getStream('[effect]', inputs)(outputHandlers$, output$);
+const effect$ = getStream('[effect]', inputs)(outputHandlers$, output$.do(x => log.trace(`[effect:${x[0]}]`, x[1])));
 const dom$    = getStream('[dom-effect]', inputs)(domHandlers$, effect$);
 
 dom$.subscribe();
