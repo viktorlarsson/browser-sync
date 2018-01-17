@@ -102,7 +102,14 @@ export function reload(document: Document, navigator: Navigator) {
         return merge(
             from([].slice.call(document.images))
                 .filter((img: HTMLImageElement) => pathsMatch(path, pathFromUrl(img.src)))
-                .map((img: HTMLImageElement) => BSDOM.propSet({target: img, prop: 'src', value: generateCacheBustUrl(img.src, expando)})),
+                .map((img: HTMLImageElement) => {
+                    return BSDOM.propSet({
+                        target: img,
+                        prop: 'src',
+                        value: generateCacheBustUrl(img.src, expando),
+                        pathname: getLocation(img.src).pathname
+                    })
+                }),
             from(IMAGE_STYLES)
                 .flatMap(({ selector, styleNames }) => {
                     return from(document.querySelectorAll(`[style*=${selector}]`))
@@ -150,28 +157,31 @@ export function reload(document: Document, navigator: Navigator) {
         return from(styleNames)
             .filter(styleName => typeof style[styleName] === 'string')
             .map((styleName: string) => {
+                let pathName;
                 const value = style[styleName];
+                const newValue = value.replace(new RegExp(`\\burl\\s*\\(([^)]*)\\)`), (match, src) => {
+                    let _src = src;
+                    if (src[0] === '"' && src[src.length-1] === '"') {
+                        _src = src.slice(1, -1);
+                    }
+                    pathName = getLocation(_src).pathname;
+                    if (pathsMatch(path, pathFromUrl(_src))) {
+                        return `url(${generateCacheBustUrl(_src, expando)})`;
+                    } else {
+                        return match;
+                    }
+                });
+
                 return [
                     style,
                     styleName,
                     value,
-                    value.replace(new RegExp(`\\burl\\s*\\(([^)]*)\\)`), (match, src) => {
-                        let _src;
-                        if (src[0] === '"' && src[src.length-1] === '"') {
-                            _src = src.slice(1, -1);
-                        } else {
-                            _src = src;
-                        }
-                        if (pathsMatch(path, pathFromUrl(_src))) {
-                            return `url(${generateCacheBustUrl(_src, expando)})`;
-                        } else {
-                            return match;
-                        }
-                    })
+                    newValue,
+                    pathName
                 ];
             })
             .filter(([style, styleName, value, newValue]) => newValue !== value)
-            .map(([style, styleName, value, newValue]) => [BSDOM.Events.StyleSet, {style, styleName, value, newValue}])
+            .map(([style, styleName, value, newValue, pathName]) => BSDOM.styleSet({style, styleName, value, newValue, pathName}))
     }
 
     function swapFile(elem, domData, options, document, navigator) {
@@ -244,6 +254,8 @@ export function reload(document: Document, navigator: Navigator) {
         const nextHref = generateCacheBustUrl(linkHref(link));
         clone.href = nextHref;
 
+        const {pathname} = getLocation(nextHref);
+
         // insert the new LINK before the old one
         const parent = link.parentNode;
         if (parent.lastChild === link) {
@@ -271,7 +283,7 @@ export function reload(document: Document, navigator: Navigator) {
                         link.parentNode.removeChild(link);
                         clone.onreadystatechange = null;
                     })
-                    .mapTo(BSDOM.linkReplace({target: clone, nextHref, prevHref}))
+                    .mapTo(BSDOM.linkReplace({target: clone, nextHref, prevHref, pathname}))
             });
     }
 
@@ -394,7 +406,8 @@ export function reload(document: Document, navigator: Navigator) {
             return reattachStylesheetLink(match.object, document, navigator);
         }
 
-        return Observable.merge(...links.map(link => reattachStylesheetLink(link, document, navigator)))
+        return empty();
+        // return Observable.merge(...links.map(link => reattachStylesheetLink(link, document, navigator)))
     }
 
 

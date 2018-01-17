@@ -8,7 +8,7 @@ import {reload} from "../vendor/Reloader";
 const nanlogger = require("nanologger");
 const log = nanlogger("Browsersync", { colors: { magenta: "#0F2634" } });
 
-const { of, empty } = Observable;
+const { of, empty, merge } = Observable;
 
 interface Inputs {
     window$: Observable<Window>,
@@ -25,6 +25,10 @@ type SocketStreamMapped = {[name in SocketNames]: (xs, inputs?: any) => EffectSt
 type EffectStreamMapped = {[name in EffectNames]: (xs, inputs?: any) => AnyStream}
 type SocketEvent = [SocketNames, any];
 type EffectEvent = [EffectNames] | [EffectNames, any] | EffectNames[];
+
+export enum Log {
+    Info = '@@Log.info',
+}
 
 export enum SocketNames {
     Connection = 'connection',
@@ -48,6 +52,9 @@ export namespace BSDOM {
     export function propSet(incoming): [Events.PropSet, any] {
         return [Events.PropSet, incoming];
     }
+    export function styleSet(incoming): [Events.StyleSet, any] {
+        return [Events.StyleSet, incoming];
+    }
     export function linkReplace(incoming): [Events.LinkReplace, any] {
         return [Events.LinkReplace, incoming];
     }
@@ -69,8 +76,11 @@ const inputs: Inputs = {
 
 const inputHandlers$ = new BehaviorSubject<SocketStreamMapped>({
     [SocketNames.Connection]: (xs) => xs
-        .map(x => {
-            return [EffectNames.SetOptions, x]
+        .flatMap(x => {
+            return of(
+                [EffectNames.SetOptions, x],
+                [Log.Info, ['Connection']],
+            );
         }),
     [SocketNames.FileReload]: (xs, inputs) => xs
         .withLatestFrom(inputs.option$)
@@ -123,21 +133,46 @@ const outputHandlers$ = new BehaviorSubject<EffectStreamMapped>({
 
 const domHandlers$ = new BehaviorSubject({
     [BSDOM.Events.PropSet]: (xs) => xs
-        .do(({target, prop, value}) => {
+        .withLatestFrom(inputs.option$.pluck('injectNotification'))
+        .do(([incoming, injectNotification]) => {
+            const {target, prop, value, pathname} = incoming;
             target[prop] = value;
+            if (injectNotification === 'console') {
+                log.info(`[PropSet]`, target, `${prop} = ${pathname}`)
+            }
         })
         .ignoreElements(),
     [BSDOM.Events.StyleSet]: (xs) => xs
-        .do(({style, styleName, newValue}) => {
+        .withLatestFrom(inputs.option$.pluck('injectNotification'))
+        .do(([event, injectNotification]) => {
+            const {style, styleName, newValue, pathName} = event;
             style[styleName] = newValue;
+
+            if (injectNotification === 'console') {
+                log.info(`[StyleSet] ${styleName} = ${pathName}`)
+            }
         })
         .ignoreElements(),
     [BSDOM.Events.LinkReplace]: (xs, inputs) => xs
-        .withLatestFrom(inputs.option$)
-        .do(([incoming, options]) => {
-            log.info(`replaced ${incoming.prevHref} with ${incoming.nextHref}`)
+        .withLatestFrom(inputs.option$.pluck('injectNotification'))
+        .do(([incoming, injectNotification]) => {
+            if (injectNotification === 'console') {
+                log.info(`[LinkReplace] ${incoming.pathname}`)
+            }
+            if (injectNotification === 'overlay') {
+                console.log('SHOULD NOTIFY');
+            }
         })
-        // .ignoreElements()
+        .ignoreElements()
+});
+
+const logHandler$ = new BehaviorSubject({
+    [Log.Info]: (xs, inputs) => {
+        return xs
+            .do(x => {
+                log.info.apply(log, x);
+            }).ignoreElements()
+    }
 });
 
 function getStream(name: string, inputs) {
@@ -153,14 +188,16 @@ function getStream(name: string, inputs) {
             .flatMap(([x, handlers]) => {
                 return handlers[x.key](x.pluck(1), inputs);
             })
+            .share()
     }
 }
 
 const output$ = getStream('[socket]', inputs)(inputHandlers$, inputs.socket$);
-const effect$ = getStream('[effect]', inputs)(outputHandlers$, output$.do(x => log.trace(`[effect:${x[0]}]`, x[1])));
+const effect$ = getStream('[effect]', inputs)(outputHandlers$, output$);
 const dom$    = getStream('[dom-effect]', inputs)(domHandlers$, effect$);
+const log$    = getStream('[log]', inputs)(logHandler$, merge(output$, effect$, dom$));
 
-dom$.subscribe();
+log$.subscribe();
 
 // var socket = require("./socket");
 // var shims = require("./client-shims");
