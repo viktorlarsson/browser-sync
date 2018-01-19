@@ -9,10 +9,18 @@ tasks:
     - build-client
 
   test:
+    - build-all
+    - cypress
+
+  cypress:
     - >
       @npm node cypress/setup/run.js
       '../configs/css-injection.js'
       cypress/integration/css-injection.js
+    - >
+      @npm node cypress/setup/run.js
+      '../configs/css-injection.js'
+      cypress/integration/img-injection.js
 
   build-server:
     - '@npm tsc'
