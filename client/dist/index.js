@@ -7090,6 +7090,7 @@ var socket_1 = __webpack_require__(477);
 var BehaviorSubject_1 = __webpack_require__(42);
 var code_sync_1 = __webpack_require__(501);
 var Reloader_1 = __webpack_require__(510);
+var notify_1 = __webpack_require__(512);
 var nanlogger = __webpack_require__(182);
 var log = nanlogger("Browsersync", { colors: { magenta: "#0F2634" } });
 var of = rxjs_1.Observable.of, empty = rxjs_1.Observable.empty, merge = rxjs_1.Observable.merge;
@@ -7139,6 +7140,7 @@ var document$ = socket_1.initDocument();
 var socket$ = socket_1.initSocket();
 var option$ = socket_1.initOptions();
 var navigator$ = socket_1.initOptions();
+var notify$ = notify_1.initNotify(option$.getValue());
 var inputs = {
     window$: window$,
     document$: document$,
@@ -7149,7 +7151,7 @@ var inputs = {
 var inputHandlers$ = new BehaviorSubject_1.BehaviorSubject((_a = {},
     _a[SocketNames.Connection] = function (xs) {
         return xs.flatMap(function (x) {
-            return of([EffectNames.SetOptions, x], [Overlay.Info, ["Connected"]]);
+            return of([EffectNames.SetOptions, x], [Overlay.Info, ["Connected to Browsersync"]]);
         });
     },
     _a[SocketNames.FileReload] = function (xs, inputs) {
@@ -7216,17 +7218,11 @@ var outputHandlers$ = new BehaviorSubject_1.BehaviorSubject((_b = {},
     _b));
 var domHandlers$ = new BehaviorSubject_1.BehaviorSubject((_c = {},
     _c[BSDOM.Events.PropSet] = function (xs) {
-        return xs
-            .withLatestFrom(inputs.option$.pluck("injectNotification"))
-            .do(function (_a) {
-            var incoming = _a[0], injectNotification = _a[1];
-            var target = incoming.target, prop = incoming.prop, value = incoming.value, pathname = incoming.pathname;
-            target[prop] = value;
-            if (injectNotification === "console") {
-                log.info("[PropSet]", target, prop + " = " + pathname);
-            }
+        return xs.do(function (event) {
+            var target = event.target, prop = event.prop, value = event.value, pathname = event.pathname;
+            // target[prop] = value;
         })
-            .ignoreElements();
+            .map(function (e) { return [Log.Info, ["[PropSet]", e.target, e.prop + " = " + e.pathname]]; });
     },
     _c[BSDOM.Events.StyleSet] = function (xs) {
         return xs
@@ -7241,33 +7237,36 @@ var domHandlers$ = new BehaviorSubject_1.BehaviorSubject((_c = {},
         })
             .ignoreElements();
     },
-    _c[BSDOM.Events.LinkReplace] = function (xs, inputs) {
-        return xs
-            .withLatestFrom(inputs.option$.pluck("injectNotification"))
-            .do(function (_a) {
-            var incoming = _a[0], injectNotification = _a[1];
-            if (injectNotification === "console") {
-                log.info("[LinkReplace] " + incoming.pathname);
-            }
-            if (injectNotification === "overlay") {
-                console.log("SHOULD NOTIFY");
-            }
-        })
-            .ignoreElements();
+    _c[BSDOM.Events.LinkReplace] = function (xs) {
+        return xs.map(function (incoming) {
+            return [Log.Info, ["[LinkReplace] " + incoming.pathname]];
+        });
     },
     _c));
 var logHandler$ = new BehaviorSubject_1.BehaviorSubject((_d = {},
     _d[Log.Info] = function (xs, inputs) {
         return xs
-            .do(function (x) {
-            log.info.apply(log, x);
+            .withLatestFrom(inputs.option$.pluck('injectNotification'))
+            .filter(function (_a) {
+            var inject = _a[1];
+            return inject === 'console';
+        })
+            .do(function (_a) {
+            var incoming = _a[0];
+            log.info.apply(log, incoming);
         })
             .ignoreElements();
     },
     _d[Overlay.Info] = function (xs) {
         return xs
-            .do(function (x) {
-            console.log(x);
+            .withLatestFrom(inputs.option$.pluck('notify'))
+            .filter(function (_a) {
+            var notify = _a[1];
+            return notify;
+        })
+            .do(function (_a) {
+            var event = _a[0];
+            notify$.next(event);
         })
             .ignoreElements();
     },
@@ -34732,6 +34731,90 @@ function updateSearch(search, key, suffix) {
             .join("&"));
 }
 exports.updateSearch = updateSearch;
+
+
+/***/ }),
+/* 512 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Subject_1 = __webpack_require__(6);
+var timer_1 = __webpack_require__(81);
+var utils = __webpack_require__(503);
+var styles = {
+    display: "none",
+    padding: "15px",
+    fontFamily: "sans-serif",
+    position: "fixed",
+    fontSize: "0.9em",
+    zIndex: 9999,
+    right: 0,
+    top: 0,
+    borderBottomLeftRadius: "5px",
+    backgroundColor: "#1B2032",
+    margin: 0,
+    color: "white",
+    textAlign: "center",
+    pointerEvents: "none"
+};
+/**
+ * @param {BrowserSync} bs
+ * @returns {*}
+ */
+function initNotify(options) {
+    var cssStyles = styles;
+    var elem;
+    if (options.notify.styles) {
+        if (Object.prototype.toString.call(options.notify.styles) ===
+            "[object Array]") {
+            // handle original array behavior, replace all styles with a joined copy
+            cssStyles = options.notify.styles.join(";");
+        }
+        else {
+            for (var key in options.notify.styles) {
+                if (options.notify.styles.hasOwnProperty(key)) {
+                    cssStyles[key] = options.notify.styles[key];
+                }
+            }
+        }
+    }
+    elem = document.createElement("DIV");
+    elem.id = "__bs_notify__";
+    if (typeof cssStyles === "string") {
+        elem.style.cssText = cssStyles;
+    }
+    else {
+        for (var rule in cssStyles) {
+            elem.style[rule] = cssStyles[rule];
+        }
+    }
+    var event$ = new Subject_1.Subject();
+    event$
+        .do(function (_a) {
+        var message = _a[0];
+        if (!elem) {
+            return false;
+        }
+        elem.innerHTML = message;
+        elem.style.display = "block";
+        document.body.appendChild(elem);
+    })
+        .switchMap(function (_a) {
+        var message = _a[0], timeout = _a[1];
+        return timer_1.timer(timeout || 2000)
+            .do(function () {
+            elem.style.display = "none";
+            if (elem.parentNode) {
+                document.body.removeChild(elem);
+            }
+        });
+    })
+        .subscribe();
+    return event$;
+}
+exports.initNotify = initNotify;
 
 
 /***/ })
