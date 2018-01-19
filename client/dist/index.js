@@ -7097,6 +7097,10 @@ var Log;
 (function (Log) {
     Log["Info"] = "@@Log.info";
 })(Log = exports.Log || (exports.Log = {}));
+var Overlay;
+(function (Overlay) {
+    Overlay["Info"] = "@@Overlay.info";
+})(Overlay = exports.Overlay || (exports.Overlay = {}));
 var SocketNames;
 (function (SocketNames) {
     SocketNames["Connection"] = "connection";
@@ -7145,7 +7149,7 @@ var inputs = {
 var inputHandlers$ = new BehaviorSubject_1.BehaviorSubject((_a = {},
     _a[SocketNames.Connection] = function (xs) {
         return xs.flatMap(function (x) {
-            return of([EffectNames.SetOptions, x], [Log.Info, ["Connection"]]);
+            return of([EffectNames.SetOptions, x], [Overlay.Info, ["Connected"]]);
         });
     },
     _a[SocketNames.FileReload] = function (xs, inputs) {
@@ -7257,6 +7261,13 @@ var logHandler$ = new BehaviorSubject_1.BehaviorSubject((_d = {},
         return xs
             .do(function (x) {
             log.info.apply(log, x);
+        })
+            .ignoreElements();
+    },
+    _d[Overlay.Info] = function (xs) {
+        return xs
+            .do(function (x) {
+            console.log(x);
         })
             .ignoreElements();
     },

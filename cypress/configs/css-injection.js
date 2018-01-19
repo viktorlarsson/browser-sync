@@ -4,4 +4,5 @@ module.exports = {
     watch: true,
     online: false,
     logLevel: 'silent',
+    minify: false,
 };

@@ -56,10 +56,7 @@ function preprocessFlags(flags) {
         stripUndefined,
         legacyFilesArgs,
         removeWatchBooleanWhenFalse
-    ].reduce(
-        (flags, fn) => fn.call(null, flags),
-        flags
-    );
+    ].reduce((flags, fn) => fn.call(null, flags), flags);
 }
 
 /**
@@ -101,7 +98,9 @@ function legacyFilesArgs(flags) {
  */
 function removeWatchBooleanWhenFalse(flags) {
     if (flags.watch === false) {
-        return fromJS(flags).delete('watch').toJS();
+        return fromJS(flags)
+            .delete("watch")
+            .toJS();
     }
     return flags;
 }
