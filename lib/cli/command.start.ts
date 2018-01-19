@@ -1,5 +1,6 @@
 import * as path from "path";
 import { existsSync } from "fs";
+import { fromJS } from "immutable";
 import * as utils from "../utils";
 import { explodeFilesArg } from "./cli-options";
 const _ = require("../lodash.custom");
@@ -51,7 +52,11 @@ export default function(opts) {
  * @returns {*}
  */
 function preprocessFlags(flags) {
-    return [stripUndefined, legacyFilesArgs].reduce(
+    return [
+        stripUndefined,
+        legacyFilesArgs,
+        removeWatchBooleanWhenFalse
+    ].reduce(
         (flags, fn) => fn.call(null, flags),
         flags
     );
@@ -84,6 +89,19 @@ function legacyFilesArgs(flags) {
             (acc, item) => acc.concat(explodeFilesArg(item)),
             []
         );
+    }
+    return flags;
+}
+
+/**
+ * `watch` is a CLI boolean so should be removed if false to
+ * allow config to set watch: true
+ * @param flags
+ * @returns {any}
+ */
+function removeWatchBooleanWhenFalse(flags) {
+    if (flags.watch === false) {
+        return fromJS(flags).delete('watch').toJS();
     }
     return flags;
 }
