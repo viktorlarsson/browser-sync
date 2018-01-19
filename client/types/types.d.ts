@@ -25,7 +25,7 @@ interface IBrowserSyncOptions {
     codeSync: boolean;
     watchEvents: string[];
     browser: string;
-    notify: boolean;
+    notify: boolean | { styles: {[index: string]: string} | string[]};
     open: boolean;
     reloadDelay: number;
     minify: boolean;

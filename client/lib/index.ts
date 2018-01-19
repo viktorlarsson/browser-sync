@@ -5,6 +5,8 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { FileReloadEventPayload } from "../types/socket";
 import { isBlacklisted, options } from "./code-sync";
 import { reload } from "../vendor/Reloader";
+import { initNotify } from "./notify";
+import { timer } from "rxjs/observable/timer";
 const nanlogger = require("nanologger");
 const log = nanlogger("Browsersync", { colors: { magenta: "#0F2634" } });
 
@@ -16,6 +18,7 @@ interface Inputs {
     socket$: Observable<SocketEvent>;
     option$: Observable<IBrowserSyncOptions>;
     navigator$: Observable<Navigator>;
+    notifyElement$: BehaviorSubject<HTMLElement>;
 }
 
 type EffectStream = Observable<[EffectNames, any]>;
@@ -32,6 +35,11 @@ type EffectEvent = [EffectNames] | [EffectNames, any] | EffectNames[];
 
 export enum Log {
     Info = "@@Log.info"
+}
+
+export enum Overlay {
+    Create = "@@Overlay.create",
+    Info = "@@Overlay.info"
 }
 
 export enum SocketNames {
@@ -68,19 +76,24 @@ const document$ = initDocument();
 const socket$ = initSocket();
 const option$ = initOptions();
 const navigator$ = initOptions();
+const notifyElement$ = initNotify(option$.getValue());
 
 const inputs: Inputs = {
     window$,
     document$,
     socket$,
     option$,
-    navigator$
+    navigator$,
+    notifyElement$
 };
 
 const inputHandlers$ = new BehaviorSubject<SocketStreamMapped>({
     [SocketNames.Connection]: xs =>
         xs.flatMap(x => {
-            return of([EffectNames.SetOptions, x], [Log.Info, ["Connection"]]);
+            return of(
+                [EffectNames.SetOptions, x],
+                [Overlay.Info, ["Connected to Browsersync"]]
+            );
         }),
     [SocketNames.FileReload]: (xs, inputs) =>
         xs
@@ -137,15 +150,14 @@ const outputHandlers$ = new BehaviorSubject<EffectStreamMapped>({
 const domHandlers$ = new BehaviorSubject({
     [BSDOM.Events.PropSet]: xs =>
         xs
-            .withLatestFrom(inputs.option$.pluck("injectNotification"))
-            .do(([incoming, injectNotification]) => {
-                const { target, prop, value, pathname } = incoming;
+            .do(event => {
+                const { target, prop, value } = event;
                 target[prop] = value;
-                if (injectNotification === "console") {
-                    log.info(`[PropSet]`, target, `${prop} = ${pathname}`);
-                }
             })
-            .ignoreElements(),
+            .map(e => [
+                Log.Info,
+                [`[PropSet]`, e.target, `${e.prop} = ${e.pathname}`]
+            ]),
     [BSDOM.Events.StyleSet]: xs =>
         xs
             .withLatestFrom(inputs.option$.pluck("injectNotification"))
@@ -158,25 +170,43 @@ const domHandlers$ = new BehaviorSubject({
                 }
             })
             .ignoreElements(),
-    [BSDOM.Events.LinkReplace]: (xs, inputs) =>
-        xs
-            .withLatestFrom(inputs.option$.pluck("injectNotification"))
-            .do(([incoming, injectNotification]) => {
-                if (injectNotification === "console") {
-                    log.info(`[LinkReplace] ${incoming.pathname}`);
-                }
-                if (injectNotification === "overlay") {
-                    console.log("SHOULD NOTIFY");
-                }
-            })
-            .ignoreElements()
+    [BSDOM.Events.LinkReplace]: xs =>
+        xs.map(incoming => {
+            return [Log.Info, [`[LinkReplace] ${incoming.pathname}`]];
+        })
 });
 
 const logHandler$ = new BehaviorSubject({
     [Log.Info]: (xs, inputs) => {
         return xs
-            .do(x => {
-                log.info.apply(log, x);
+            .withLatestFrom(inputs.option$.pluck("injectNotification"))
+            .filter(([, inject]) => inject === "console")
+            .do(([incoming]) => {
+                log.info.apply(log, incoming);
+            })
+            .ignoreElements();
+    },
+    [Overlay.Info]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(
+                inputs.option$,
+                inputs.notifyElement$,
+                inputs.document$
+            )
+            .filter(([, options]) => options.notify)
+            .do(([event, options, element, document]) => {
+                element.innerHTML = event[0];
+                element.style.display = "block";
+
+                document.body.appendChild(element);
+            })
+            .switchMap(([event, options, element, document]) => {
+                return timer(event[1] || 2000).do(() => {
+                    element.style.display = "none";
+                    if (element.parentNode) {
+                        document.body.removeChild(element);
+                    }
+                });
             })
             .ignoreElements();
     }
