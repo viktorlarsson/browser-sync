@@ -9,7 +9,7 @@ import {empty} from "rxjs/observable/empty";
 import {Observable} from "rxjs/Observable";
 import {merge} from "rxjs/observable/merge";
 import {from} from "rxjs/observable/from";
-import {BSDOM} from "../lib";
+import {BSDOM} from "../lib/BSDOM";
 
 var hiddenElem;
 
@@ -255,6 +255,7 @@ export function reload(document: Document, navigator: Navigator) {
         clone.href = nextHref;
 
         const {pathname} = getLocation(nextHref);
+        const basename = pathname.split('/').slice(-1)[0];
 
         // insert the new LINK before the old one
         const parent = link.parentNode;
@@ -283,7 +284,7 @@ export function reload(document: Document, navigator: Navigator) {
                         link.parentNode.removeChild(link);
                         clone.onreadystatechange = null;
                     })
-                    .mapTo(BSDOM.linkReplace({target: clone, nextHref, prevHref, pathname}))
+                    .mapTo(BSDOM.linkReplace({target: clone, nextHref, prevHref, pathname, basename}))
             });
     }
 

@@ -31,7 +31,7 @@ interface IBrowserSyncOptions {
     minify: boolean;
     rewriteRules: any[];
     injectFileTypes: string[];
-    injectNotification?: 'console' | 'overlay';
+    injectNotification: boolean | ('console' | 'overlay');
     cors: boolean;
     proxy: boolean;
     tagNames: ITagNames;

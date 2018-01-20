@@ -1,4 +1,4 @@
-import {SocketNames} from "../lib";
+import {SocketNames} from "../lib/SocketNS";
 
 export type FileReloadEventPayload = {
     url?: string;
