@@ -1,12 +1,12 @@
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {Observable} from "rxjs/Rx";
-import {FileReloadEventPayload} from "../types/socket";
-import {EffectStream} from "./index";
-import {isBlacklisted} from "./code-sync";
-import {of} from "rxjs/observable/of";
-import {empty} from "rxjs/observable/empty";
-import {EffectEvent, EffectNames} from "./Effects";
-import {Overlay} from "./Log";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { Observable } from "rxjs/Rx";
+import { FileReloadEventPayload } from "../types/socket";
+import { EffectStream } from "./index";
+import { isBlacklisted } from "./code-sync";
+import { of } from "rxjs/observable/of";
+import { empty } from "rxjs/observable/empty";
+import { EffectEvent, EffectNames } from "./Effects";
+import { Overlay } from "./Log";
 
 export namespace SocketNS {
 

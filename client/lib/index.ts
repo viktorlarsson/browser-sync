@@ -1,13 +1,13 @@
 ///<reference path="types.ts"/>
-import {Observable} from "rxjs";
-import {initDocument, initOptions, initSocket, initWindow} from "./socket";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {initNotify} from "./notify";
-import {domHandlers$} from "./BSDOM";
-import {SocketEvent, socketHandlers$} from "./SocketNS";
-import {merge} from "rxjs/observable/merge";
-import {logHandler$} from "./Log";
-import {EffectNames, outputHandlers$} from "./Effects";
+import { Observable } from "rxjs";
+import { initDocument, initOptions, initSocket, initWindow } from "./socket";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { initNotify } from "./notify";
+import { domHandlers$ } from "./BSDOM";
+import { SocketEvent, socketHandlers$ } from "./SocketNS";
+import { merge } from "rxjs/observable/merge";
+import { logHandler$ } from "./Log";
+import { EffectNames, outputHandlers$ } from "./Effects";
 
 export interface Inputs {
     window$: Observable<Window>;

@@ -1,7 +1,7 @@
-import {Observable} from "rxjs/Rx";
-import {Inputs} from "./index";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {Log} from "./Log";
+import { Observable } from "rxjs/Rx";
+import { Inputs } from "./index";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { Log } from "./Log";
 
 export namespace BSDOM {
     export enum Events {
@@ -19,14 +19,16 @@ export namespace BSDOM {
     }
 
     export type LinkReplacePayload = {
-        target: HTMLLinkElement,
-        nextHref: string,
-        prevHref: string,
-        pathname: string,
-        basename: string,
-    }
+        target: HTMLLinkElement;
+        nextHref: string;
+        prevHref: string;
+        pathname: string;
+        basename: string;
+    };
 
-    export function linkReplace(incoming: LinkReplacePayload): [Events.LinkReplace, LinkReplacePayload] {
+    export function linkReplace(
+        incoming: LinkReplacePayload
+    ): [Events.LinkReplace, LinkReplacePayload] {
         return [Events.LinkReplace, incoming];
     }
 }
@@ -35,29 +37,42 @@ export const domHandlers$ = new BehaviorSubject({
     [BSDOM.Events.PropSet](xs) {
         return xs
             .do(event => {
-                const {target, prop, value} = event;
+                const { target, prop, value } = event;
                 target[prop] = value;
             })
-            .map(e => Log.consoleInfo(`[PropSet]`, e.target, `${e.prop} = ${e.pathname}`))
+            .map(e =>
+                Log.consoleInfo(
+                    `[PropSet]`,
+                    e.target,
+                    `${e.prop} = ${e.pathname}`
+                )
+            );
     },
     [BSDOM.Events.StyleSet](xs) {
         return xs
-            .do((event) => {
-                const {style, styleName, newValue, pathName} = event;
+            .do(event => {
+                const { style, styleName, newValue, pathName } = event;
                 style[styleName] = newValue;
             })
-            .map(e => Log.consoleDebug(`[StyleSet] ${e.styleName} = ${e.pathName}`))
+            .map(e =>
+                Log.consoleDebug(`[StyleSet] ${e.styleName} = ${e.pathName}`)
+            );
     },
-    [BSDOM.Events.LinkReplace](xs: Observable<BSDOM.LinkReplacePayload>, inputs: Inputs) {
+    [BSDOM.Events.LinkReplace](
+        xs: Observable<BSDOM.LinkReplacePayload>,
+        inputs: Inputs
+    ) {
         return xs
-            .withLatestFrom<BSDOM.LinkReplacePayload, any>(inputs.option$.pluck("injectNotification"))
+            .withLatestFrom<BSDOM.LinkReplacePayload, any>(
+                inputs.option$.pluck("injectNotification")
+            )
             .filter(([, inject]) => inject)
             .map(([incoming, inject]) => {
                 const message = `[LinkReplace] ${incoming.basename}`;
-                if (inject === 'overlay') {
+                if (inject === "overlay") {
                     return Log.overlayInfo(message);
                 }
                 return Log.consoleInfo(message);
-            })
-    },
+            });
+    }
 });

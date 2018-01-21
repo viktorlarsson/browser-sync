@@ -1,7 +1,7 @@
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {options} from "./code-sync";
-import {AnyStream, Inputs} from "./index";
-import {reload} from "../vendor/Reloader";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { options } from "./code-sync";
+import { AnyStream, Inputs } from "./index";
+import { reload } from "../vendor/Reloader";
 
 export enum EffectNames {
     FileReload = "@@FileReload",
