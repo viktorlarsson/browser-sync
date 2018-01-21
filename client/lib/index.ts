@@ -9,6 +9,7 @@ import { merge } from "rxjs/observable/merge";
 import { initLogger, logHandler$ } from "./Log";
 import { EffectNames, outputHandlers$ } from "./Effects";
 import { Nanologger } from "../vendor/logger";
+import { windowNameHandlers$ } from "./WindowName";
 
 export interface Inputs {
     window$: Observable<Window>;
@@ -57,8 +58,14 @@ function getStream(name: string, inputs) {
 const output$ = getStream("[socket]", inputs)(socketHandlers$, inputs.socket$);
 const effect$ = getStream("[effect]", inputs)(outputHandlers$, output$);
 const dom$ = getStream("[dom-effect]", inputs)(domHandlers$, effect$);
+
+const joined = {
+    ...logHandler$.getValue(),
+    ...windowNameHandlers$.getValue()
+};
+
 const log$ = getStream("[log]", inputs)(
-    logHandler$,
+    new BehaviorSubject(joined),
     merge(output$, effect$, dom$)
 );
 

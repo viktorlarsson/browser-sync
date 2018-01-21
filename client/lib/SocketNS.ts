@@ -5,7 +5,7 @@ import { EffectStream } from "./index";
 import { isBlacklisted } from "./code-sync";
 import { of } from "rxjs/observable/of";
 import { empty } from "rxjs/observable/empty";
-import { EffectEvent, EffectNames } from "./Effects";
+import {EffectEvent, EffectNames, reloadBrowserSafe} from "./Effects";
 import { Log, Overlay } from "./Log";
 
 export namespace SocketNS {
@@ -42,7 +42,7 @@ export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
             .flatMap(([event, options]): Observable<EffectEvent> => {
                 const data: FileReloadEventPayload = event;
                 if (data.url || !options.injectChanges) {
-                    return of([EffectNames.BrowserReload]);
+                    return reloadBrowserSafe();
                 }
                 if (data.basename && data.ext && isBlacklisted(data)) {
                     return empty();
@@ -53,5 +53,5 @@ export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
         xs
             .withLatestFrom(inputs.option$)
             .filter(([event, options]) => options.codeSync)
-            .mapTo([EffectNames.BrowserReload])
+            .flatMap(reloadBrowserSafe)
 });

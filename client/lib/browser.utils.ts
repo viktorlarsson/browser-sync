@@ -16,17 +16,15 @@ export function getDocument() {
  * Get the current x/y position crossbow
  * @returns {{x: *, y: *}}
  */
-export function getBrowserScrollPosition() {
-    var $window = getWindow();
-    var $document = getDocument();
+export function getBrowserScrollPosition(window, document) {
     var scrollX;
     var scrollY;
-    var dElement = $document.documentElement;
-    var dBody = $document.body;
+    var dElement = document.documentElement;
+    var dBody = document.body;
 
-    if ($window.pageYOffset !== undefined) {
-        scrollX = $window.pageXOffset;
-        scrollY = $window.pageYOffset;
+    if (window.pageYOffset !== undefined) {
+        scrollX = window.pageXOffset;
+        scrollY = window.pageYOffset;
     } else {
         scrollX = dElement.scrollLeft || dBody.scrollLeft || 0;
         scrollY = dElement.scrollTop || dBody.scrollTop || 0;
@@ -54,9 +52,9 @@ export function getScrollSpace() {
 /**
  * Saves scroll position into cookies
  */
-export function saveScrollPosition() {
-    const pos = getBrowserScrollPosition();
-    getDocument().cookie = "bs_scroll_pos=" + [pos.x, pos.y].join(",");
+export function saveScrollPosition(window, document) {
+    const pos = getBrowserScrollPosition(window, document);
+    document.cookie = "bs_scroll_pos=" + [pos.x, pos.y].join(",");
 }
 
 /**
