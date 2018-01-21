@@ -21,6 +21,26 @@ tasks:
       @npm node cypress/setup/run.js
       '../configs/css-injection.js'
       cypress/integration/img-injection.js
+    - >
+      @npm node cypress/setup/run.js
+      '../configs/no-notify.js'
+      cypress/integration/no-notify.js
+    - >
+      @npm node cypress/setup/run.js
+      '../configs/css-overlay-notify.js'
+      cypress/integration/css-overlay-notify.js
+    - >
+      @npm node cypress/setup/run.js
+      '../configs/css-console-notify.js'
+      cypress/integration/css-console-notify.js
+    - >
+      @npm node cypress/setup/run.js
+      '../configs/css-injection.js'
+      cypress/integration/connection-notify.js
+    - >
+      @npm node cypress/setup/run.js
+      '../configs/logPrefix.js'
+      cypress/integration/logPrefix.js
 
   build-server:
     - '@npm tsc'
