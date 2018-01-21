@@ -6,7 +6,7 @@ import { isBlacklisted } from "./code-sync";
 import { of } from "rxjs/observable/of";
 import { empty } from "rxjs/observable/empty";
 import { EffectEvent, EffectNames } from "./Effects";
-import { Overlay } from "./Log";
+import { Log, Overlay } from "./Log";
 
 export namespace SocketNS {
 
@@ -25,13 +25,16 @@ export enum SocketNames {
 export type SocketEvent = [SocketNames, any];
 
 export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
-    [SocketNames.Connection]: xs =>
-        xs.flatMap(x => {
-            return of(
-                [EffectNames.SetOptions, x],
-                [Overlay.Info, ["Connected to Browsersync"]]
-            );
-        }),
+    [SocketNames.Connection]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(inputs.option$.pluck("logPrefix"))
+            .flatMap(([x, logPrefix]) => {
+                return of(
+                    [EffectNames.SetOptions, x],
+                    Log.overlayInfo(`${logPrefix}: connected`)
+                );
+            });
+    },
     [SocketNames.FileReload]: (xs, inputs) =>
         xs
             .withLatestFrom(inputs.option$)

@@ -1,6 +1,6 @@
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 
-var styles = {
+const styles = {
     display: "none",
     padding: "15px",
     fontFamily: "sans-serif",
@@ -22,7 +22,7 @@ var styles = {
  * @returns {BehaviorSubject<any>}
  */
 export function initNotify(options) {
-    var cssStyles = styles;
+    let cssStyles = styles;
     let elem;
 
     if (options.notify.styles) {

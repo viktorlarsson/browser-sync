@@ -6,8 +6,9 @@ import { initNotify } from "./notify";
 import { domHandlers$ } from "./BSDOM";
 import { SocketEvent, socketHandlers$ } from "./SocketNS";
 import { merge } from "rxjs/observable/merge";
-import { logHandler$ } from "./Log";
+import { initLogger, logHandler$ } from "./Log";
 import { EffectNames, outputHandlers$ } from "./Effects";
+import { Nanologger } from "../vendor/logger";
 
 export interface Inputs {
     window$: Observable<Window>;
@@ -16,6 +17,7 @@ export interface Inputs {
     option$: BehaviorSubject<IBrowserSyncOptions>;
     navigator$: Observable<Navigator>;
     notifyElement$: BehaviorSubject<HTMLElement>;
+    logInstance$: Observable<Nanologger>;
 }
 
 export type EffectStream = Observable<[EffectNames, any]>;
@@ -27,6 +29,7 @@ const socket$ = initSocket();
 const option$ = initOptions();
 const navigator$ = initOptions();
 const notifyElement$ = initNotify(option$.getValue());
+const logInstance$ = initLogger(option$.getValue());
 
 const inputs: Inputs = {
     window$,
@@ -34,7 +37,8 @@ const inputs: Inputs = {
     socket$,
     option$,
     navigator$,
-    notifyElement$
+    notifyElement$,
+    logInstance$
 };
 
 function getStream(name: string, inputs) {

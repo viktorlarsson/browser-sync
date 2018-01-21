@@ -1,11 +1,16 @@
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { timer } from "rxjs/observable/timer";
-import OverlayInfoPayload = Log.OverlayInfoPayload;
 import { Observable } from "rxjs/Observable";
 import ConsolePayload = Log.ConsolePayload;
+import { of } from "rxjs/observable/of";
+import { Nanologger } from "../vendor/logger";
 
-const nanlogger = require("nanologger");
-const log = nanlogger("Browsersync", { colors: { magenta: "#0F2634" } });
+export function initLogger(options: IBrowserSyncOptions) {
+    const log = new Nanologger(options.logPrefix, {
+        colors: { magenta: "#0F2634" }
+    });
+    return of(log);
+}
 
 export enum LogNames {
     Log = "@@Log",
@@ -41,15 +46,20 @@ export const logHandler$ = new BehaviorSubject({
                 /**
                  * access injectNotification from the options stream
                  */
-                .withLatestFrom(inputs.option$.pluck("injectNotification"))
+                .withLatestFrom(
+                    inputs.logInstance$,
+                    inputs.option$.pluck("injectNotification")
+                )
                 /**
                  * only accept messages if injectNotification !== console
                  */
                 .filter(
-                    ([, injectNotification]) => injectNotification === "console"
+                    ([, , injectNotification]) =>
+                        injectNotification === "console"
                 )
-                .pluck(0)
-                .do((event: ConsolePayload) => {
+                .do(incoming => {
+                    const event: ConsolePayload = incoming[0];
+                    const log: Nanologger = incoming[1];
                     switch (event[0]) {
                         case LogNames.Info: {
                             return log.info.apply(log, event[1]);
