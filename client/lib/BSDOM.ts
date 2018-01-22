@@ -8,7 +8,8 @@ export namespace BSDOM {
         PropSet = "@@BSDOM.Events.PropSet",
         StyleSet = "@@BSDOM.Events.StyleSet",
         LinkReplace = "@@BSDOM.Events.LinkReplace",
-        SetScroll = "@@BSDOM.Events.SetScroll"
+        SetScroll = "@@BSDOM.Events.SetScroll",
+        SetWindowName = "@@BSDOM.Events.SetWindowName"
     }
 
     export function propSet(incoming): [Events.PropSet, any] {
@@ -19,8 +20,15 @@ export namespace BSDOM {
         return [Events.StyleSet, incoming];
     }
 
-    export function setScroll(x, y): [Events.SetScroll, {x: number, y: number}] {
-        return [Events.SetScroll, {x, y}];
+    export function setWindowName(
+        incoming: string
+    ): [Events.SetWindowName, string] {
+        return [Events.SetWindowName, incoming];
+    }
+
+    export type SetScrollPayload = { x: number; y: number };
+    export function setScroll(x, y): [Events.SetScroll, SetScrollPayload] {
+        return [Events.SetScroll, { x, y }];
     }
 
     export type LinkReplacePayload = {
@@ -80,9 +88,16 @@ export const domHandlers$ = new BehaviorSubject({
                 return Log.consoleInfo(message);
             });
     },
-    [BSDOM.Events.SetScroll]: (xs) => {
+    [BSDOM.Events.SetScroll]: (xs, inputs: Inputs) => {
         return xs
-            .do(x => console.log('setScroll', x))
+            .withLatestFrom(inputs.window$)
+            .do(([event, window]) => window.scrollTo(event.x, event.y))
+            .ignoreElements();
+    },
+    [BSDOM.Events.SetWindowName]: (xs, inputs: Inputs) => {
+        return xs
+            .withLatestFrom(inputs.window$)
+            .do(([value, window]) => (window.name = value))
             .ignoreElements();
     }
 });

@@ -10,7 +10,7 @@ import { initLogger, logHandler$ } from "./Log";
 import { EffectNames, outputHandlers$ } from "./Effects";
 import { Nanologger } from "../vendor/logger";
 import { scrollRestoreHandlers$ } from "./ScrollRestore";
-import {zip} from "rxjs/observable/zip";
+import { zip } from "rxjs/observable/zip";
 
 export interface Inputs {
     window$: Observable<Window>;
@@ -60,7 +60,7 @@ const combinedEffectHandler$ = zip(
     outputHandlers$,
     scrollRestoreHandlers$,
     (...args) => {
-        return args.reduce((acc, item) => ({...acc, ...item}), {})
+        return args.reduce((acc, item) => ({ ...acc, ...item }), {});
     }
 );
 
@@ -70,10 +70,7 @@ const dom$ = getStream("[dom-effect]", inputs)(domHandlers$, effect$);
 
 const merged$ = merge(output$, effect$, dom$);
 
-const log$ = getStream("[log]", inputs)(
-    logHandler$,
-    merged$,
-);
+const log$ = getStream("[log]", inputs)(logHandler$, merged$);
 
 log$.subscribe();
 
