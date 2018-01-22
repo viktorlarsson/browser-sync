@@ -2,9 +2,9 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { options } from "./code-sync";
 import { Inputs } from "./index";
 import { reload } from "../vendor/Reloader";
-import {of} from "rxjs/observable/of";
-import {async} from "rxjs/scheduler/async";
-import {concat} from "rxjs/observable/concat";
+import { of } from "rxjs/observable/of";
+import { async } from "rxjs/scheduler/async";
+import { concat } from "rxjs/observable/concat";
 
 export enum EffectNames {
     FileReload = "@@FileReload",
@@ -23,7 +23,7 @@ export function reloadBrowserSafe() {
          * On the next tick, perform the reload
          */
         of([EffectNames.BrowserReload]).subscribeOn(async)
-    )
+    );
 }
 
 export type EffectEvent = [EffectNames] | [EffectNames, any] | EffectNames[];
@@ -56,6 +56,6 @@ export const outputHandlers$ = new BehaviorSubject({
     [EffectNames.BrowserReload]: (xs, inputs: Inputs) => {
         return xs
             .withLatestFrom(inputs.window$)
-            .do(([, window]) => window.location.reload(true))
+            .do(([, window]) => window.location.reload(true));
     }
 });

@@ -9,7 +9,8 @@ import { merge } from "rxjs/observable/merge";
 import { initLogger, logHandler$ } from "./Log";
 import { EffectNames, outputHandlers$ } from "./Effects";
 import { Nanologger } from "../vendor/logger";
-import { windowNameHandlers$ } from "./WindowName";
+import { scrollRestoreHandlers$ } from "./ScrollRestore";
+import {zip} from "rxjs/observable/zip";
 
 export interface Inputs {
     window$: Observable<Window>;
@@ -55,18 +56,23 @@ function getStream(name: string, inputs) {
     };
 }
 
+const combinedEffectHandler$ = zip(
+    outputHandlers$,
+    scrollRestoreHandlers$,
+    (...args) => {
+        return args.reduce((acc, item) => ({...acc, ...item}), {})
+    }
+);
+
 const output$ = getStream("[socket]", inputs)(socketHandlers$, inputs.socket$);
-const effect$ = getStream("[effect]", inputs)(outputHandlers$, output$);
+const effect$ = getStream("[effect]", inputs)(combinedEffectHandler$, output$);
 const dom$ = getStream("[dom-effect]", inputs)(domHandlers$, effect$);
 
-const joined = {
-    ...logHandler$.getValue(),
-    ...windowNameHandlers$.getValue()
-};
+const merged$ = merge(output$, effect$, dom$);
 
 const log$ = getStream("[log]", inputs)(
-    new BehaviorSubject(joined),
-    merge(output$, effect$, dom$)
+    logHandler$,
+    merged$,
 );
 
 log$.subscribe();

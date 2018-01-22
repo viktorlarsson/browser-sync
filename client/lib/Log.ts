@@ -15,7 +15,7 @@ export function initLogger(options: IBrowserSyncOptions) {
 export enum LogNames {
     Log = "@@Log",
     Info = "@@Log.info",
-    Debug = "@@Log.debug"
+    Debug = "@@Log.debug",
 }
 
 export enum Overlay {

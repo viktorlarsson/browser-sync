@@ -1,16 +1,17 @@
-import {getBrowserScrollPosition, setScroll} from "./browser.utils";
-import {EffectNames} from "./Effects";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {Inputs} from "./index";
-import {empty} from "rxjs/observable/empty";
+import { getBrowserScrollPosition, setScroll } from "./browser.utils";
+import { EffectNames } from "./Effects";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { Inputs } from "./index";
+import { empty } from "rxjs/observable/empty";
+import { of } from "rxjs/observable/of";
+import {Log} from "./Log";
 
 export function initCookie() {
-    console.log('initCookie');
+    console.log("initCookie");
     return empty();
 }
 
-export function initWindowName() {
-    console.log('initWindowName');
+export function initWindowName(window: Window) {
     var PRE = "<<BS_START>>";
     var SUF = "<<BS_END>>";
     var regex = new RegExp(PRE + "(.+?)" + SUF);
@@ -30,32 +31,35 @@ export function initWindowName() {
     }
 
     /**
-     * If the JSON was parsed correctly, try to
-     * find a scroll property and restore it.
-     */
-    if (saved && saved.bs && saved.bs.hardReload && saved.bs.scroll) {
-        setScroll(saved.bs.scroll);
-    }
-
-    /**
      * Remove any existing BS json from window.name
      * to ensure we don't interfere with any other
      * libs who may be using it.
      */
     window.name = window.name.replace(regex, "");
+
+    /**
+     * If the JSON was parsed correctly, try to
+     * find a scroll property and restore it.
+     */
+    if (saved && saved.bs && saved.bs.hardReload && saved.bs.scroll) {
+        const {x, y} = saved.bs.scroll;
+        window.scrollTo(x, y);
+        return of(Log.consoleDebug(`[ScrollRestore] x: ${x} y: ${y}`))
+    }
     return empty();
 }
 
-export const windowNameHandlers$ = new BehaviorSubject({
-    [EffectNames.SetOptions]: (xs) => {
+export const scrollRestoreHandlers$ = new BehaviorSubject({
+    [EffectNames.SetOptions]: (xs, inputs: Inputs) => {
         return xs
-            .do((options) => {
-                if (options.scrollRestoreTechnique === 'window.name') {
-                    return initWindowName();
+            .withLatestFrom(inputs.window$)
+            .take(1)
+            .flatMap(([options, window]) => {
+                if (options.scrollRestoreTechnique === "window.name") {
+                    return initWindowName(window);
                 }
                 initCookie();
             })
-            .take(1)
     },
     /**
      * Hard reload the browser
@@ -78,6 +82,6 @@ export const windowNameHandlers$ = new BehaviorSubject({
                     SUF
                 ].join("");
                 window.name = newname;
-            })
+            });
     }
 });

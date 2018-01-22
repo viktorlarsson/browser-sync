@@ -5,7 +5,7 @@ import { EffectStream } from "./index";
 import { isBlacklisted } from "./code-sync";
 import { of } from "rxjs/observable/of";
 import { empty } from "rxjs/observable/empty";
-import {EffectEvent, EffectNames, reloadBrowserSafe} from "./Effects";
+import { EffectEvent, EffectNames, reloadBrowserSafe } from "./Effects";
 import { Log, Overlay } from "./Log";
 
 export namespace SocketNS {
