@@ -7,7 +7,8 @@ export namespace BSDOM {
     export enum Events {
         PropSet = "@@BSDOM.Events.PropSet",
         StyleSet = "@@BSDOM.Events.StyleSet",
-        LinkReplace = "@@BSDOM.Events.LinkReplace"
+        LinkReplace = "@@BSDOM.Events.LinkReplace",
+        SetScroll = "@@BSDOM.Events.SetScroll"
     }
 
     export function propSet(incoming): [Events.PropSet, any] {
@@ -16,6 +17,10 @@ export namespace BSDOM {
 
     export function styleSet(incoming): [Events.StyleSet, any] {
         return [Events.StyleSet, incoming];
+    }
+
+    export function setScroll(x, y): [Events.SetScroll, {x: number, y: number}] {
+        return [Events.SetScroll, {x, y}];
     }
 
     export type LinkReplacePayload = {
@@ -74,5 +79,10 @@ export const domHandlers$ = new BehaviorSubject({
                 }
                 return Log.consoleInfo(message);
             });
+    },
+    [BSDOM.Events.SetScroll]: (xs) => {
+        return xs
+            .do(x => console.log('setScroll', x))
+            .ignoreElements();
     }
 });

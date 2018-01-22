@@ -5,6 +5,7 @@ import { Inputs } from "./index";
 import { empty } from "rxjs/observable/empty";
 import { of } from "rxjs/observable/of";
 import {Log} from "./Log";
+import {BSDOM} from "./BSDOM";
 
 export function initCookie() {
     console.log("initCookie");
@@ -43,8 +44,7 @@ export function initWindowName(window: Window) {
      */
     if (saved && saved.bs && saved.bs.hardReload && saved.bs.scroll) {
         const {x, y} = saved.bs.scroll;
-        window.scrollTo(x, y);
-        return of(Log.consoleDebug(`[ScrollRestore] x: ${x} y: ${y}`))
+        return of(BSDOM.setScroll(x, y))
     }
     return empty();
 }
