@@ -24,6 +24,12 @@ const IMAGE_STYLES = [
     { selector: 'border', styleNames: ['borderImage', 'webkitBorderImage', 'MozBorderImage'] }
 ];
 
+const attrs = {
+    link: "href",
+    img: "src",
+    script: "src"
+};
+
 export interface ReloadOptions {
     stylesheetReloadTimeout?: number;
     serverURL?: string;
@@ -31,7 +37,6 @@ export interface ReloadOptions {
     liveCSS?: boolean;
     liveImg?: boolean;
     tagNames: {[index: string]: string}
-    attrs: {[index: string]: string}
 }
 
 export function reload(document: Document, navigator: Navigator) {
@@ -86,7 +91,7 @@ export function reload(document: Document, navigator: Navigator) {
 
     function getElems(fileExtension, options: ReloadOptions, document: Document) {
         const tagName = options.tagNames[fileExtension];
-        const attr    = options.attrs[tagName];
+        const attr    = attrs[tagName];
         return {
             attr,
             tagName,

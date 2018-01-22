@@ -116,3 +116,20 @@ export function updateSearch(search, key, suffix) {
             .join("&")
     );
 }
+
+const blacklist = [
+    // never allow .map files through
+    function(incoming) {
+        return incoming.ext === "map";
+    }
+];
+
+/**
+ * @param incoming
+ * @returns {boolean}
+ */
+export function isBlacklisted(incoming) {
+    return blacklist.some(function(fn) {
+        return fn(incoming);
+    });
+}

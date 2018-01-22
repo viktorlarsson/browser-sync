@@ -1,13 +1,12 @@
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Rx";
 import { FileReloadEventPayload } from "../types/socket";
-import {EffectStream, Inputs} from "./index";
-import { isBlacklisted } from "./code-sync";
+import { EffectStream, Inputs } from "./index";
+import { isBlacklisted } from "./utils";
 import { of } from "rxjs/observable/of";
 import { empty } from "rxjs/observable/empty";
 import { EffectEvent, EffectNames, reloadBrowserSafe } from "./Effects";
 import { Log, Overlay } from "./Log";
-import {BSDOM} from "./BSDOM";
 
 export namespace SocketNS {
 
@@ -37,15 +36,14 @@ export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
                         Log.overlayInfo(`${logPrefix}: connected`)
                     );
                 }
-                console.log('NOT 0');
                 return of(reloadBrowserSafe());
             });
     },
     [SocketNames.Disconnect]: (xs, inputs: Inputs) => {
         return xs.do(x => console.log(x)).ignoreElements();
     },
-    [SocketNames.FileReload]: (xs, inputs) =>
-        xs
+    [SocketNames.FileReload]: (xs, inputs) => {
+        return xs
             .withLatestFrom(inputs.option$)
             .filter(([event, options]) => options.codeSync)
             .flatMap(([event, options]): Observable<EffectEvent> => {
@@ -57,7 +55,8 @@ export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
                     return empty();
                 }
                 return of([EffectNames.FileReload, event]);
-            }),
+            });
+    },
     [SocketNames.BrowserReload]: (xs, inputs) =>
         xs
             .withLatestFrom(inputs.option$)
