@@ -9,6 +9,7 @@ export enum EffectNames {
     FileReload = "@@FileReload",
     PreBrowserReload = "@@PreBrowserReload",
     BrowserReload = "@@BrowserReload",
+    BrowserSetLocation = "@@BrowserSetLocation",
     SetOptions = "@@SetOptions"
 }
 
@@ -58,5 +59,21 @@ export const outputHandlers$ = new BehaviorSubject({
         return xs
             .withLatestFrom(inputs.window$)
             .do(([, window]) => window.location.reload(true));
+    },
+    /**
+     * Set the location of the browser
+     */
+    [EffectNames.BrowserSetLocation]: (xs, inputs: Inputs) => {
+        return xs
+            .withLatestFrom(inputs.window$)
+            .do(([event, window]) => {
+                if (event.path) {
+                    return window.location = window.location.protocol + "//" + window.location.host + event.path;
+                }
+                if (event.url) {
+                    return window.location = event.url;
+                }
+            })
+            .ignoreElements()
     }
 });

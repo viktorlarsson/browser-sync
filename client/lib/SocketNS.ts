@@ -20,7 +20,8 @@ export enum SocketNames {
     Connection = "connection",
     Disconnect = "disconnect",
     FileReload = "file:reload",
-    BrowserReload = "browser:reload"
+    BrowserReload = "browser:reload",
+    BrowserLocation = "browser:location",
 }
 
 export type SocketEvent = [SocketNames, any];
@@ -61,5 +62,13 @@ export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
         xs
             .withLatestFrom(inputs.option$)
             .filter(([event, options]) => options.codeSync)
-            .flatMap(reloadBrowserSafe)
+            .flatMap(reloadBrowserSafe),
+    [SocketNames.BrowserLocation]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(inputs.option$.pluck('ghostMode', 'location'))
+            .filter(([, canSyncLocation]) => canSyncLocation)
+            .map(([event]) => {
+                return [EffectNames.BrowserSetLocation, event];
+            });
+    }
 });
