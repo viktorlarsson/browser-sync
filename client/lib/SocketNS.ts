@@ -58,11 +58,12 @@ export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
                 return of([EffectNames.FileReload, event]);
             });
     },
-    [SocketNames.BrowserReload]: (xs, inputs) =>
-        xs
+    [SocketNames.BrowserReload]: (xs, inputs) => {
+        return xs
             .withLatestFrom(inputs.option$)
             .filter(([event, options]) => options.codeSync)
-            .flatMap(reloadBrowserSafe),
+            .flatMap(reloadBrowserSafe);
+    },
     [SocketNames.BrowserLocation]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.option$.pluck('ghostMode', 'location'))
