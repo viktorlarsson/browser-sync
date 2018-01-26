@@ -194,3 +194,11 @@ export function getByPath(obj, path) {
 
     return obj;
 }
+
+export function getScrollPosition(window: Window, document: Document) {
+    const pos = getBrowserScrollPosition(window, document);
+    return {
+        raw: pos, // Get px of x and y axis of scroll
+        proportional: exports.getScrollTopPercentage(pos) // Get % of y axis of scroll
+    };
+}

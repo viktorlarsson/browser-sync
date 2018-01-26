@@ -20,6 +20,7 @@ export interface Inputs {
     navigator$: Observable<Navigator>;
     notifyElement$: BehaviorSubject<HTMLElement>;
     logInstance$: Observable<Nanologger>;
+    io$: BehaviorSubject<any>;
 }
 
 export type EffectStream = Observable<[EffectNames, any]>;
@@ -27,7 +28,7 @@ export type AnyStream = Observable<any | [any, any]>;
 
 const window$ = initWindow();
 const document$ = initDocument();
-const socket$ = initSocket();
+const {socket$, io$} = initSocket();
 const option$ = initOptions();
 const navigator$ = initOptions();
 const notifyElement$ = initNotify(option$.getValue());
@@ -40,7 +41,8 @@ const inputs: Inputs = {
     option$,
     navigator$,
     notifyElement$,
-    logInstance$
+    logInstance$,
+    io$
 };
 
 function getStream(name: string, inputs) {

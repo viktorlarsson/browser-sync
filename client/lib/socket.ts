@@ -51,12 +51,14 @@ export function initSocket() {
     const io = socket(socketUrl, socketConfig);
     const onevent = io.onevent;
 
-    const on$ = Observable.create(obs => {
+    const socket$ = Observable.create(obs => {
         io.onevent = function(packet) {
             onevent.call(this, packet);
             obs.next(packet.data);
         };
     }).share();
+
+    const io$ = new BehaviorSubject(io);
 
     /**
      * *****BACK-COMPAT*******
@@ -64,5 +66,5 @@ export function initSocket() {
      */
     window.___browserSync___.socket = io;
 
-    return on$;
+    return {socket$, io$};
 }
