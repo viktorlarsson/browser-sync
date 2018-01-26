@@ -4,12 +4,15 @@ import { reload } from "../vendor/Reloader";
 import { of } from "rxjs/observable/of";
 import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
+import {SocketNS} from "./SocketNS";
+import {getScrollSpace} from "./browser.utils";
 
 export enum EffectNames {
     FileReload = "@@FileReload",
     PreBrowserReload = "@@PreBrowserReload",
     BrowserReload = "@@BrowserReload",
     BrowserSetLocation = "@@BrowserSetLocation",
+    BrowserSetScroll = "@@BrowserSetScroll",
     SetOptions = "@@SetOptions"
 }
 
@@ -75,5 +78,24 @@ export const outputHandlers$ = new BehaviorSubject({
                 }
             })
             .ignoreElements()
+    },
+    [EffectNames.BrowserSetScroll]: (xs, inputs: Inputs) => {
+        return xs
+            .withLatestFrom(inputs.window$, inputs.document$, inputs.option$.pluck('scrollProportionally'))
+            .do((incoming) => {
+                const event: SocketNS.ScrollPayload = incoming[0];
+                const window: Window = incoming[1];
+                const document: Document = incoming[2];
+                const scrollProportionally: boolean = incoming[3];
+
+                const scrollSpace = getScrollSpace(document);
+
+                if (scrollProportionally) {
+                    return window.scrollTo(0, scrollSpace.y * event.position.proportional); // % of y axis of scroll to px
+                } else {
+                    return window.scrollTo(0, event.position.raw.y);
+                }
+            })
+            .ignoreElements();
     }
 });

@@ -39,10 +39,9 @@ export function getBrowserScrollPosition(window, document) {
 /**
  * @returns {{x: number, y: number}}
  */
-export function getScrollSpace() {
-    var $document = getDocument();
-    var dElement = $document.documentElement;
-    var dBody = $document.body;
+export function getScrollSpace(document: Document) {
+    const dElement = document.documentElement;
+    const dBody = document.body;
     return {
         x: dBody.scrollHeight - dElement.clientWidth,
         y: dBody.scrollHeight - dElement.clientHeight

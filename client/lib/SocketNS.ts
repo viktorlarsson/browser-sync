@@ -9,7 +9,10 @@ import { EffectEvent, EffectNames, reloadBrowserSafe } from "./Effects";
 import { Log, Overlay } from "./Log";
 
 export namespace SocketNS {
-
+    export interface ScrollPayload {
+        position: {raw: {x: number, y: number}, proportional: number},
+        override: boolean
+    }
 }
 
 type SocketStreamMapped = {
@@ -22,7 +25,10 @@ export enum SocketNames {
     FileReload = "file:reload",
     BrowserReload = "browser:reload",
     BrowserLocation = "browser:location",
+    Scroll = "scroll",
 }
+
+
 
 export type SocketEvent = [SocketNames, any];
 
@@ -71,5 +77,13 @@ export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
             .map(([event]) => {
                 return [EffectNames.BrowserSetLocation, event];
             });
-    }
+    },
+    [SocketNames.Scroll]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(inputs.option$.pluck('ghostMode', 'scroll'))
+            .filter(([, canScroll]) => canScroll)
+            .map(([event]) => {
+                return [EffectNames.BrowserSetScroll, event];
+            });
+    },
 });
