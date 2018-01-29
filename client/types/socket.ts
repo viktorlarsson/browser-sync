@@ -1,4 +1,4 @@
-import {SocketNames} from "../lib/SocketNS";
+import {IncomingSocketNames} from "../lib/SocketNS";
 
 export type FileReloadEventPayload = {
     url?: string;
@@ -9,4 +9,4 @@ export type FileReloadEventPayload = {
     type: 'inject' | 'reload';
 }
 
-export type FileReloadEvent = [SocketNames.FileReload, FileReloadEventPayload];
+export type FileReloadEvent = [IncomingSocketNames.FileReload, FileReloadEventPayload];

@@ -4,7 +4,7 @@ import { reload } from "../vendor/Reloader";
 import { of } from "rxjs/observable/of";
 import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
-import {SocketNS} from "./SocketNS";
+import {ScrollEvent} from "./SocketNS";
 import {getScrollSpace} from "./browser.utils";
 
 export enum EffectNames {
@@ -83,7 +83,7 @@ export const outputHandlers$ = new BehaviorSubject({
         return xs
             .withLatestFrom(inputs.window$, inputs.document$, inputs.option$.pluck('scrollProportionally'))
             .do((incoming) => {
-                const event: SocketNS.ScrollPayload = incoming[0];
+                const event: ScrollEvent.IncomingPayload = incoming[0];
                 const window: Window = incoming[1];
                 const document: Document = incoming[2];
                 const scrollProportionally: boolean = incoming[3];

@@ -1,21 +1,31 @@
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Rx";
 import { FileReloadEventPayload } from "../types/socket";
-import { EffectStream, Inputs } from "./index";
+import { Inputs } from "./index";
 import { isBlacklisted } from "./utils";
 import { of } from "rxjs/observable/of";
 import { empty } from "rxjs/observable/empty";
 import { EffectEvent, EffectNames, reloadBrowserSafe } from "./Effects";
-import { Log, Overlay } from "./Log";
+import { Log } from "./Log";
 
-export namespace SocketNS {
-    export interface ScrollPayload {
-        position: {raw: {x: number, y: number}, proportional: number},
+export namespace ScrollEvent {
+    export interface Data {
+        raw: {x: number, y: number},
+        proportional: number
+    }
+    export interface OutgoingPayload {
+        position: Data
+    }
+    export interface IncomingPayload {
+        position: Data,
         override: boolean
+    }
+    export function outgoing(data: Data): [OutgoingSocketEvents.Scroll, OutgoingPayload] {
+        return [OutgoingSocketEvents.Scroll, {position: data}];
     }
 }
 
-export enum SocketNames {
+export enum IncomingSocketNames {
     Connection = "connection",
     Disconnect = "disconnect",
     FileReload = "file:reload",
@@ -25,13 +35,13 @@ export enum SocketNames {
 }
 
 export enum OutgoingSocketEvents {
-    Scroll = 'scroll'
+    Scroll = '@@outgoing/scroll'
 }
 
-export type SocketEvent = [SocketNames, any];
+export type SocketEvent = [IncomingSocketNames, any];
 
 export const socketHandlers$ = new BehaviorSubject({
-    [SocketNames.Connection]: (xs, inputs) => {
+    [IncomingSocketNames.Connection]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.option$.pluck("logPrefix"))
             .flatMap(([x, logPrefix], index) => {
@@ -44,10 +54,10 @@ export const socketHandlers$ = new BehaviorSubject({
                 return of(reloadBrowserSafe());
             });
     },
-    [SocketNames.Disconnect]: (xs, inputs: Inputs) => {
+    [IncomingSocketNames.Disconnect]: (xs, inputs: Inputs) => {
         return xs.do(x => console.log(x)).ignoreElements();
     },
-    [SocketNames.FileReload]: (xs, inputs) => {
+    [IncomingSocketNames.FileReload]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.option$)
             .filter(([event, options]) => options.codeSync)
@@ -62,13 +72,13 @@ export const socketHandlers$ = new BehaviorSubject({
                 return of([EffectNames.FileReload, event]);
             });
     },
-    [SocketNames.BrowserReload]: (xs, inputs) => {
+    [IncomingSocketNames.BrowserReload]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.option$)
             .filter(([event, options]) => options.codeSync)
             .flatMap(reloadBrowserSafe);
     },
-    [SocketNames.BrowserLocation]: (xs, inputs) => {
+    [IncomingSocketNames.BrowserLocation]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.option$.pluck('ghostMode', 'location'))
             .filter(([, canSyncLocation]) => canSyncLocation)
@@ -76,7 +86,7 @@ export const socketHandlers$ = new BehaviorSubject({
                 return [EffectNames.BrowserSetLocation, event];
             });
     },
-    [SocketNames.Scroll]: (xs, inputs) => {
+    [IncomingSocketNames.Scroll]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.option$.pluck('ghostMode', 'scroll'))
             .filter(([, canScroll]) => canScroll)
@@ -86,8 +96,8 @@ export const socketHandlers$ = new BehaviorSubject({
     },
     [OutgoingSocketEvents.Scroll]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.socket$)
-            .do(([event, socket]) => socket.emit(event[0], event[1]))
+            .withLatestFrom(inputs.io$)
+            .do(([event, io]) => io.emit(IncomingSocketNames.Scroll, event))
             .ignoreElements();
     }
 });
