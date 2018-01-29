@@ -4,9 +4,11 @@ import {ScrollEvent} from "./SocketNS";
 import {getScrollPosition} from "./browser.utils";
 const eventManager = require('./events').manager;
 
-export function initOutgoing(window: Window, document: Document) {
+export function initOutgoing(window: Window, document: Document, resume$) {
     const merged$ = merge(
         scrollObservable(window)
+            .withLatestFrom(resume$)
+            .filter(([, canSync]) => canSync)
             .map(() => {
                 return ScrollEvent.outgoing(getScrollPosition(window, document));
             })

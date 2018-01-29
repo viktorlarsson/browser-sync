@@ -1,6 +1,7 @@
 ///<reference path="types.ts"/>
 import { Observable } from "rxjs/Observable";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { Subject } from "rxjs/Subject";
 import { zip } from "rxjs/observable/zip";
 import { initDocument, initOptions, initSocket, initWindow } from "./socket";
 import { initNotify } from "./notify";
@@ -35,7 +36,15 @@ const option$ = initOptions();
 const navigator$ = initOptions();
 const notifyElement$ = initNotify(option$.getValue());
 const logInstance$ = initLogger(option$.getValue());
-const outgoing$ = initOutgoing(window, document);
+
+const scroller$ = socket$.filter(([name]) => name === 'scroll');
+const resume$ = new Subject();
+scroller$
+    .do(() => resume$.next(false))
+    .buffer(scroller$.debounceTime(1000))
+    .subscribe(() => resume$.next(true));
+
+const outgoing$ = initOutgoing(window, document, resume$);
 
 const inputs: Inputs = {
     window$,
@@ -79,6 +88,8 @@ const merged$ = merge(output$, effect$, dom$);
 const log$ = getStream("[log]", inputs)(logHandler$, merged$);
 
 log$.subscribe();
+
+resume$.next(true);
 
 // var socket = require("./socket");
 // var shims = require("./client-shims");
