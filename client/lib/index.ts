@@ -36,15 +36,7 @@ const option$ = initOptions();
 const navigator$ = initOptions();
 const notifyElement$ = initNotify(option$.getValue());
 const logInstance$ = initLogger(option$.getValue());
-
-const scroller$ = socket$.filter(([name]) => name === 'scroll');
-const resume$ = new Subject();
-scroller$
-    .do(() => resume$.next(false))
-    .buffer(scroller$.debounceTime(1000))
-    .subscribe(() => resume$.next(true));
-
-const outgoing$ = initOutgoing(window, document, resume$);
+const outgoing$ = initOutgoing(window, document, socket$);
 
 const inputs: Inputs = {
     window$,
@@ -89,7 +81,7 @@ const log$ = getStream("[log]", inputs)(logHandler$, merged$);
 
 log$.subscribe();
 
-resume$.next(true);
+// resume$.next(true);
 
 // var socket = require("./socket");
 // var shims = require("./client-shims");
