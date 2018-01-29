@@ -199,6 +199,22 @@ export function getScrollPosition(window: Window, document: Document) {
     const pos = getBrowserScrollPosition(window, document);
     return {
         raw: pos, // Get px of x and y axis of scroll
-        proportional: exports.getScrollTopPercentage(pos) // Get % of y axis of scroll
+        proportional: getScrollTopPercentage(pos, document) // Get % of y axis of scroll
     };
 }
+
+export function getScrollTopPercentage(pos, document) {
+    var scrollSpace = getScrollSpace(document);
+    var percentage = getScrollPercentage(scrollSpace, pos);
+    return percentage.y;
+};
+
+export function getScrollPercentage(scrollSpace, scrollPosition) {
+    var x = scrollPosition.x / scrollSpace.x;
+    var y = scrollPosition.y / scrollSpace.y;
+
+    return {
+        x: x || 0,
+        y: y
+    };
+};

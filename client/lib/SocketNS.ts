@@ -15,10 +15,6 @@ export namespace SocketNS {
     }
 }
 
-type SocketStreamMapped = {
-    [name in SocketNames]: (xs, inputs?: any) => EffectStream
-};
-
 export enum SocketNames {
     Connection = "connection",
     Disconnect = "disconnect",
@@ -28,11 +24,13 @@ export enum SocketNames {
     Scroll = "scroll",
 }
 
-
+export enum OutgoingSocketEvents {
+    Scroll = 'scroll'
+}
 
 export type SocketEvent = [SocketNames, any];
 
-export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
+export const socketHandlers$ = new BehaviorSubject({
     [SocketNames.Connection]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.option$.pluck("logPrefix"))
@@ -86,4 +84,10 @@ export const socketHandlers$ = new BehaviorSubject<SocketStreamMapped>({
                 return [EffectNames.BrowserSetScroll, event];
             });
     },
+    [OutgoingSocketEvents.Scroll]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(inputs.socket$)
+            .do(([event, socket]) => socket.emit(event[0], event[1]))
+            .ignoreElements();
+    }
 });
