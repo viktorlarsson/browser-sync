@@ -42,7 +42,7 @@ export function getBrowserScrollPosition(window, document): ICoords {
 /**
  * @returns {{x: number, y: number}}
  */
-export function getScrollSpace(document: Document) {
+export function getDocumentScrollSpace(document: Document): ScrollEvent.ICoords {
     const dElement = document.documentElement;
     const dBody = document.body;
     return {
@@ -222,7 +222,7 @@ export function getScrollPositionForElement(element: HTMLElement): ScrollEvent.D
 }
 
 export function getScrollTopPercentage(pos, document): number {
-    const scrollSpace = getScrollSpace(document);
+    const scrollSpace = getDocumentScrollSpace(document);
     const percentage = getScrollPercentage(scrollSpace, pos);
     return percentage.y;
 }

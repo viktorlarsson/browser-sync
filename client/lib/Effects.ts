@@ -5,7 +5,7 @@ import { of } from "rxjs/observable/of";
 import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
 import {ScrollEvent} from "./SocketNS";
-import {getScrollSpace} from "./browser.utils";
+import {getDocumentScrollSpace} from "./browser.utils";
 import {merge} from "rxjs/observable/merge";
 
 export enum EffectNames {
@@ -87,23 +87,24 @@ export const outputHandlers$ = new BehaviorSubject({
             .partition(([event]) => event.tagName === 'document');
 
         return merge(
+            /**
+             * Main window scroll
+             */
             document$.do((incoming) => {
-
                 const event: ScrollEvent.IncomingPayload = incoming[0];
                 const window: Window = incoming[1];
                 const document: Document = incoming[2];
                 const scrollProportionally: boolean = incoming[3];
+                const scrollSpace = getDocumentScrollSpace(document);
 
-                const scrollSpace = getScrollSpace(document);
-
-                /**
-                 * Main window scroll
-                 */
                 if (scrollProportionally) {
                     return window.scrollTo(0, scrollSpace.y * event.position.proportional); // % of y axis of scroll to px
                 }
                 return window.scrollTo(0, event.position.raw.y);
             }),
+            /**
+             * Element scrolls
+             */
             element$.do(incoming => {
                 const event: ScrollEvent.IncomingPayload = incoming[0];
                 const document: Document = incoming[2];
