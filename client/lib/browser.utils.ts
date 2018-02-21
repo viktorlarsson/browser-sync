@@ -1,6 +1,9 @@
 /**
  * @returns {window}
  */
+import {ScrollEvent} from "./SocketNS";
+import ICoords = ScrollEvent.ICoords;
+
 export function getWindow() {
     return window;
 }
@@ -16,7 +19,7 @@ export function getDocument() {
  * Get the current x/y position crossbow
  * @returns {{x: *, y: *}}
  */
-export function getBrowserScrollPosition(window, document) {
+export function getBrowserScrollPosition(window, document): ICoords {
     var scrollX;
     var scrollY;
     var dElement = document.documentElement;
@@ -195,7 +198,7 @@ export function getByPath(obj, path) {
     return obj;
 }
 
-export function getScrollPosition(window: Window, document: Document) {
+export function getScrollPosition(window: Window, document: Document): ScrollEvent.Data {
     const pos = getBrowserScrollPosition(window, document);
     return {
         raw: pos, // Get px of x and y axis of scroll
@@ -203,15 +206,30 @@ export function getScrollPosition(window: Window, document: Document) {
     };
 }
 
-export function getScrollTopPercentage(pos, document) {
-    var scrollSpace = getScrollSpace(document);
-    var percentage = getScrollPercentage(scrollSpace, pos);
-    return percentage.y;
-};
+export function getScrollPositionForElement(element: HTMLElement): ScrollEvent.Data {
+    const raw: ICoords = {
+        x: element.scrollLeft,
+        y: element.scrollTop,
+    };
+    const scrollSpace: ICoords = {
+        x: element.scrollWidth,
+        y: element.scrollHeight
+    };
+    return {
+        raw, // Get px of x and y axis of scroll
+        proportional: getScrollPercentage(scrollSpace, raw).y // Get % of y axis of scroll
+    };
+}
 
-export function getScrollPercentage(scrollSpace, scrollPosition) {
-    var x = scrollPosition.x / scrollSpace.x;
-    var y = scrollPosition.y / scrollSpace.y;
+export function getScrollTopPercentage(pos, document): number {
+    const scrollSpace = getScrollSpace(document);
+    const percentage = getScrollPercentage(scrollSpace, pos);
+    return percentage.y;
+}
+
+export function getScrollPercentage(scrollSpace: ICoords, scrollPosition: ICoords): ICoords {
+    const x = scrollPosition.x / scrollSpace.x;
+    const y = scrollPosition.y / scrollSpace.y;
 
     return {
         x: x || 0,

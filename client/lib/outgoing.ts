@@ -1,12 +1,10 @@
 import {Observable} from 'rxjs/Observable';
 import {merge} from 'rxjs/observable/merge';
 import {ScrollEvent} from "./SocketNS";
-import {getScrollPosition} from "./browser.utils";
-import {empty} from "rxjs/observable/empty";
+import {getScrollPosition, getScrollPositionForElement} from "./browser.utils";
 import {of} from "rxjs/observable/of";
 import {timer} from "rxjs/observable/timer";
 import {concat} from "rxjs/observable/concat";
-const eventManager = require('./events').manager;
 
 export function initOutgoing(window: Window, document: Document, socket$) {
     const merged$ = merge(
@@ -32,18 +30,13 @@ function getScrollStream(window, document, socket$) {
             const {target} = scrollEvent;
 
             if (target === document) {
-                console.log('document scroll');
+                return ScrollEvent.outgoing(getScrollPosition(window, document), 'document', 0);
             }
 
             const elems = document.getElementsByTagName(target.tagName);
+            const index = Array.prototype.indexOf.call((elems || []), target);
 
-            if (elems && elems.length) {
-                const {tagName} = target;
-                console.log('element scroll', tagName);
-                console.log('element index', Array.prototype.indexOf.call(elems, target));
-            }
-
-            return ScrollEvent.outgoing(getScrollPosition(window, document));
+            return ScrollEvent.outgoing(getScrollPositionForElement(target), target.tagName, index);
         });
 }
 

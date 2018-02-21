@@ -6,6 +6,7 @@ import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
 import {ScrollEvent} from "./SocketNS";
 import {getScrollSpace} from "./browser.utils";
+import {merge} from "rxjs/observable/merge";
 
 export enum EffectNames {
     FileReload = "@@FileReload",
@@ -80,9 +81,14 @@ export const outputHandlers$ = new BehaviorSubject({
             .ignoreElements()
     },
     [EffectNames.BrowserSetScroll]: (xs, inputs: Inputs) => {
-        return xs
+
+        const [document$, element$] = xs
             .withLatestFrom(inputs.window$, inputs.document$, inputs.option$.pluck('scrollProportionally'))
-            .do((incoming) => {
+            .partition(([event]) => event.tagName === 'document');
+
+        return merge(
+            document$.do((incoming) => {
+
                 const event: ScrollEvent.IncomingPayload = incoming[0];
                 const window: Window = incoming[1];
                 const document: Document = incoming[2];
@@ -90,12 +96,30 @@ export const outputHandlers$ = new BehaviorSubject({
 
                 const scrollSpace = getScrollSpace(document);
 
+                /**
+                 * Main window scroll
+                 */
                 if (scrollProportionally) {
                     return window.scrollTo(0, scrollSpace.y * event.position.proportional); // % of y axis of scroll to px
-                } else {
-                    return window.scrollTo(0, event.position.raw.y);
+                }
+                return window.scrollTo(0, event.position.raw.y);
+            }),
+            element$.do(incoming => {
+                const event: ScrollEvent.IncomingPayload = incoming[0];
+                const document: Document = incoming[2];
+                const scrollProportionally: boolean = incoming[3];
+
+                const matchingElements = document.getElementsByTagName(event.tagName);
+                if (matchingElements && matchingElements.length) {
+                    const match = matchingElements[event.index];
+                    if (match) {
+                        if (scrollProportionally) {
+                            return match.scrollTo(0, match.scrollHeight * event.position.proportional); // % of y axis of scroll to px
+                        }
+                        return match.scrollTo(0, event.position.raw.y);
+                    }
                 }
             })
-            .ignoreElements();
+        ).ignoreElements();
     }
 });

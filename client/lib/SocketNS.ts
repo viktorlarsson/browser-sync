@@ -9,19 +9,26 @@ import { EffectEvent, EffectNames, reloadBrowserSafe } from "./Effects";
 import { Log } from "./Log";
 
 export namespace ScrollEvent {
+    export interface ICoords {
+        x: number, y: number
+    }
     export interface Data {
-        raw: {x: number, y: number},
+        raw: ICoords,
         proportional: number
     }
     export interface OutgoingPayload {
         position: Data
+        tagName: string,
+        index: number
     }
     export interface IncomingPayload {
         position: Data,
-        override: boolean
+        tagName: string,
+        index: number,
+        override?: boolean
     }
-    export function outgoing(data: Data): [OutgoingSocketEvents.Scroll, OutgoingPayload] {
-        return [OutgoingSocketEvents.Scroll, {position: data}];
+    export function outgoing(data: Data, tagName: string, index: number): [OutgoingSocketEvents.Scroll, OutgoingPayload] {
+        return [OutgoingSocketEvents.Scroll, {position: data, tagName, index}];
     }
 }
 
