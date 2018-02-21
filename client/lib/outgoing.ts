@@ -24,19 +24,41 @@ function getScrollStream(window, document, socket$) {
      */
     const canSync$ = createBooleanStream(socket$.filter(([name]) => name === 'scroll'));
 
-    return scrollObservable(window)
+    return scrollObservable(window, document)
         .withLatestFrom(canSync$)
         .filter(([, canSync]) => canSync)
-        .map(() => {
+        .map((incoming) => {
+            const scrollEvent: {target: HTMLElement} = incoming[0];
+            const {target} = scrollEvent;
+
+            if (target === document) {
+                console.log('document scroll');
+            }
+
+            const elems = document.getElementsByTagName(target.tagName);
+
+            if (elems && elems.length) {
+                const {tagName} = target;
+                console.log('element scroll', tagName);
+                console.log('element index', Array.prototype.indexOf.call(elems, target));
+            }
+
             return ScrollEvent.outgoing(getScrollPosition(window, document));
         });
 }
 
-function scrollObservable(window) {
+function scrollObservable(window, document) {
     return Observable.create(obs => {
-        eventManager.addEvent(window, 'scroll', function() {
-            obs.next('scroll');
-        });
+        // eventManager.addEvent(window, 'scroll', function(e) {
+        //     obs.next({target: window});
+        // });
+        document.addEventListener('scroll', function(e) {
+            obs.next({target: e.target});
+        }, true)
+        // eventManager.addEvent(document, 'scroll', function(e) {
+        //     // obs.next('scroll');
+        //     console.log(e);
+        // });
     }).share();
 }
 

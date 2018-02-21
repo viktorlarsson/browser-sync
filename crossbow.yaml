@@ -1,5 +1,8 @@
 tasks:
 
+  dev:
+    - '@npm cd client && ./node_modules/.bin/webpack --watch'
+
   (example):
     bootstrap: '@sh node dist/bin test/fixtures/bootstrap -w --no-open'
 
@@ -48,9 +51,6 @@ tasks:
   build-client:
     - '@npm cd client && ./node_modules/.bin/webpack'
     - '@npm cd client && ./node_modules/.bin/webpack -p --output-filename index.min.js'
-
-  dev:
-    - '@npm cd client && ./node_modules/.bin/webpack --watch'
 
   lint: >
     @npm prettier
