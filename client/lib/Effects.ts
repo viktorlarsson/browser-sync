@@ -144,10 +144,10 @@ export const outputHandlers$ = new BehaviorSubject({
                         }, 0);
                     } else {
                         window.setTimeout(function() {
-                            if (document.createEventObject) {
-                                const evObj = document.createEventObject();
+                            if ((document as any).createEventObject) {
+                                const evObj = (document as any).createEventObject();
                                 evObj.cancelBubble = true;
-                                match.fireEvent("on" + "click", evObj);
+                                (match as any).fireEvent("on" + "click", evObj);
                             }
                         }, 0);
                     }

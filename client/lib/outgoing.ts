@@ -9,17 +9,21 @@ import {concat} from "rxjs/observable/concat";
 export function initOutgoing(window: Window, document: Document, socket$) {
     const merged$ = merge(
         getScrollStream(window, document, socket$),
-        getClickStream(document)
+        getClickStream(document, socket$)
     );
 
     return merged$;
 }
 
-function getClickStream(document: Document) {
+function getClickStream(document: Document, socket$) {
+
+    const canSync$ = createBooleanStream(socket$.filter(([name]) => name === 'click'));
+
     return clickObservable(document)
-        .map(incoming => {
-            const clickEvent: {target: HTMLElement} = incoming;
-            console.log(ClickEvent.outgoing(getElementData(clickEvent.target)));
+        .withLatestFrom(canSync$)
+        .filter(([, canSync]) => canSync)
+        .map((incoming) => {
+            const clickEvent: {target: HTMLElement} = incoming[0];
             return ClickEvent.outgoing(getElementData(clickEvent.target))
         })
 }
