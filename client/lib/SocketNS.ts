@@ -32,6 +32,18 @@ export namespace ScrollEvent {
     }
 }
 
+export namespace ClickEvent {
+    export interface ElementData {
+        tagName: string,
+        index: number
+    }
+    export type OutgoingPayload = ElementData;
+    export type IncomingPayload = ElementData;
+    export function outgoing(data: ElementData): [OutgoingSocketEvents.Click, ElementData] {
+        return [OutgoingSocketEvents.Click, data];
+    }
+}
+
 export enum IncomingSocketNames {
     Connection = "connection",
     Disconnect = "disconnect",
@@ -39,10 +51,12 @@ export enum IncomingSocketNames {
     BrowserReload = "browser:reload",
     BrowserLocation = "browser:location",
     Scroll = "scroll",
+    Click = "click",
 }
 
 export enum OutgoingSocketEvents {
-    Scroll = '@@outgoing/scroll'
+    Scroll = '@@outgoing/scroll',
+    Click = '@@outgoing/click',
 }
 
 export type SocketEvent = [IncomingSocketNames, any];
@@ -101,10 +115,25 @@ export const socketHandlers$ = new BehaviorSubject({
                 return [EffectNames.BrowserSetScroll, event];
             });
     },
+    [IncomingSocketNames.Click]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(inputs.option$.pluck('ghostMode', 'clicks'))
+            .do(x => x)
+            .filter(([, canClick]) => canClick)
+            .map(([event]) => {
+                return [EffectNames.SimulateClick, event];
+            });
+    },
     [OutgoingSocketEvents.Scroll]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.io$)
             .do(([event, io]) => io.emit(IncomingSocketNames.Scroll, event))
+            .ignoreElements();
+    },
+    [OutgoingSocketEvents.Click]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(inputs.io$)
+            .do(([event, io]) => io.emit(IncomingSocketNames.Click, event))
             .ignoreElements();
     }
 });

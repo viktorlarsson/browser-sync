@@ -4,7 +4,7 @@ import { reload } from "../vendor/Reloader";
 import { of } from "rxjs/observable/of";
 import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
-import {ScrollEvent} from "./SocketNS";
+import {ClickEvent, ScrollEvent} from "./SocketNS";
 import {getDocumentScrollSpace} from "./browser.utils";
 import {merge} from "rxjs/observable/merge";
 
@@ -14,7 +14,8 @@ export enum EffectNames {
     BrowserReload = "@@BrowserReload",
     BrowserSetLocation = "@@BrowserSetLocation",
     BrowserSetScroll = "@@BrowserSetScroll",
-    SetOptions = "@@SetOptions"
+    SetOptions = "@@SetOptions",
+    SimulateClick = "@@SimulateClick",
 }
 
 export function reloadBrowserSafe() {
@@ -122,5 +123,36 @@ export const outputHandlers$ = new BehaviorSubject({
                 }
             })
         ).ignoreElements();
+    },
+    [EffectNames.SimulateClick]: (xs, inputs: Inputs) => {
+        return xs
+            .withLatestFrom(inputs.window$, inputs.document$)
+            .do((incoming) => {
+                const event: ClickEvent.IncomingPayload = incoming[0];
+                const window: Window = incoming[1];
+                const document: Document = incoming[2];
+
+                const elems = document.getElementsByTagName(event.tagName);
+                const match = elems[event.index];
+
+                if (match) {
+                    if (document.createEvent) {
+                        window.setTimeout(function() {
+                            const evObj = document.createEvent("MouseEvents");
+                            evObj.initEvent("click", true, true);
+                            match.dispatchEvent(evObj);
+                        }, 0);
+                    } else {
+                        window.setTimeout(function() {
+                            if (document.createEventObject) {
+                                const evObj = document.createEventObject();
+                                evObj.cancelBubble = true;
+                                match.fireEvent("on" + "click", evObj);
+                            }
+                        }, 0);
+                    }
+                }
+            })
+            .ignoreElements();
     }
 });

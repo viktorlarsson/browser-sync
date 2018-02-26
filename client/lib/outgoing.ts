@@ -1,20 +1,30 @@
 import {Observable} from 'rxjs/Observable';
 import {merge} from 'rxjs/observable/merge';
-import {ScrollEvent} from "./SocketNS";
-import {getScrollPosition, getScrollPositionForElement} from "./browser.utils";
+import {ClickEvent, ScrollEvent} from "./SocketNS";
+import {getElementData, getScrollPosition, getScrollPositionForElement} from "./browser.utils";
 import {of} from "rxjs/observable/of";
 import {timer} from "rxjs/observable/timer";
 import {concat} from "rxjs/observable/concat";
 
 export function initOutgoing(window: Window, document: Document, socket$) {
     const merged$ = merge(
-        getScrollStream(window, document, socket$)
+        getScrollStream(window, document, socket$),
+        getClickStream(document)
     );
 
     return merged$;
 }
 
-function getScrollStream(window, document, socket$) {
+function getClickStream(document: Document) {
+    return clickObservable(document)
+        .map(incoming => {
+            const clickEvent: {target: HTMLElement} = incoming;
+            console.log(ClickEvent.outgoing(getElementData(clickEvent.target)));
+            return ClickEvent.outgoing(getElementData(clickEvent.target))
+        })
+}
+
+function getScrollStream(window: Window, document: Document, socket$) {
 
     /**
      * A stream of booleans than can be used to pause/resume
@@ -29,7 +39,7 @@ function getScrollStream(window, document, socket$) {
             const scrollEvent: {target: HTMLElement} = incoming[0];
             const {target} = scrollEvent;
 
-            if (target === document) {
+            if ((target as any) === document) {
                 return ScrollEvent.outgoing(getScrollPosition(window, document), 'document', 0);
             }
 
@@ -40,18 +50,19 @@ function getScrollStream(window, document, socket$) {
         });
 }
 
+function clickObservable(document: Document) {
+    return Observable.create(obs => {
+        document.body.addEventListener('click', function(e) {
+            obs.next({target: e.target});
+        }, true);
+    }).share();
+}
+
 function scrollObservable(window, document) {
     return Observable.create(obs => {
-        // eventManager.addEvent(window, 'scroll', function(e) {
-        //     obs.next({target: window});
-        // });
         document.addEventListener('scroll', function(e) {
             obs.next({target: e.target});
-        }, true)
-        // eventManager.addEvent(document, 'scroll', function(e) {
-        //     // obs.next('scroll');
-        //     console.log(e);
-        // });
+        }, true);
     }).share();
 }
 
