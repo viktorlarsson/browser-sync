@@ -66,5 +66,5 @@ export function initSocket() {
      */
     window.___browserSync___.socket = io;
 
-    return {socket$, io$};
+    return { socket$, io$ };
 }

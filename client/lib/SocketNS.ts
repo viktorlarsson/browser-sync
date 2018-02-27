@@ -10,36 +10,46 @@ import { Log } from "./Log";
 
 export namespace ScrollEvent {
     export interface ICoords {
-        x: number, y: number
+        x: number;
+        y: number;
     }
     export interface Data {
-        raw: ICoords,
-        proportional: number
+        raw: ICoords;
+        proportional: number;
     }
     export interface OutgoingPayload {
-        position: Data
-        tagName: string,
-        index: number
+        position: Data;
+        tagName: string;
+        index: number;
     }
     export interface IncomingPayload {
-        position: Data,
-        tagName: string,
-        index: number,
-        override?: boolean
+        position: Data;
+        tagName: string;
+        index: number;
+        override?: boolean;
     }
-    export function outgoing(data: Data, tagName: string, index: number): [OutgoingSocketEvents.Scroll, OutgoingPayload] {
-        return [OutgoingSocketEvents.Scroll, {position: data, tagName, index}];
+    export function outgoing(
+        data: Data,
+        tagName: string,
+        index: number
+    ): [OutgoingSocketEvents.Scroll, OutgoingPayload] {
+        return [
+            OutgoingSocketEvents.Scroll,
+            { position: data, tagName, index }
+        ];
     }
 }
 
 export namespace ClickEvent {
     export interface ElementData {
-        tagName: string,
-        index: number
+        tagName: string;
+        index: number;
     }
     export type OutgoingPayload = ElementData;
     export type IncomingPayload = ElementData;
-    export function outgoing(data: ElementData): [OutgoingSocketEvents.Click, ElementData] {
+    export function outgoing(
+        data: ElementData
+    ): [OutgoingSocketEvents.Click, ElementData] {
         return [OutgoingSocketEvents.Click, data];
     }
 }
@@ -51,12 +61,12 @@ export enum IncomingSocketNames {
     BrowserReload = "browser:reload",
     BrowserLocation = "browser:location",
     Scroll = "scroll",
-    Click = "click",
+    Click = "click"
 }
 
 export enum OutgoingSocketEvents {
-    Scroll = '@@outgoing/scroll',
-    Click = '@@outgoing/click',
+    Scroll = "@@outgoing/scroll",
+    Click = "@@outgoing/click"
 }
 
 export type SocketEvent = [IncomingSocketNames, any];
@@ -101,7 +111,7 @@ export const socketHandlers$ = new BehaviorSubject({
     },
     [IncomingSocketNames.BrowserLocation]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.option$.pluck('ghostMode', 'location'))
+            .withLatestFrom(inputs.option$.pluck("ghostMode", "location"))
             .filter(([, canSyncLocation]) => canSyncLocation)
             .map(([event]) => {
                 return [EffectNames.BrowserSetLocation, event];
@@ -109,7 +119,7 @@ export const socketHandlers$ = new BehaviorSubject({
     },
     [IncomingSocketNames.Scroll]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.option$.pluck('ghostMode', 'scroll'))
+            .withLatestFrom(inputs.option$.pluck("ghostMode", "scroll"))
             .filter(([, canScroll]) => canScroll)
             .map(([event]) => {
                 return [EffectNames.BrowserSetScroll, event];
@@ -117,7 +127,7 @@ export const socketHandlers$ = new BehaviorSubject({
     },
     [IncomingSocketNames.Click]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.option$.pluck('ghostMode', 'clicks'))
+            .withLatestFrom(inputs.option$.pluck("ghostMode", "clicks"))
             .do(x => x)
             .filter(([, canClick]) => canClick)
             .map(([event]) => {

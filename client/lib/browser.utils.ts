@@ -1,7 +1,7 @@
 /**
  * @returns {window}
  */
-import {ScrollEvent} from "./SocketNS";
+import { ScrollEvent } from "./SocketNS";
 import ICoords = ScrollEvent.ICoords;
 
 export function getWindow() {
@@ -42,7 +42,9 @@ export function getBrowserScrollPosition(window, document): ICoords {
 /**
  * @returns {{x: number, y: number}}
  */
-export function getDocumentScrollSpace(document: Document): ScrollEvent.ICoords {
+export function getDocumentScrollSpace(
+    document: Document
+): ScrollEvent.ICoords {
     const dElement = document.documentElement;
     const dBody = document.body;
     return {
@@ -198,7 +200,10 @@ export function getByPath(obj, path) {
     return obj;
 }
 
-export function getScrollPosition(window: Window, document: Document): ScrollEvent.Data {
+export function getScrollPosition(
+    window: Window,
+    document: Document
+): ScrollEvent.Data {
     const pos = getBrowserScrollPosition(window, document);
     return {
         raw: pos, // Get px of x and y axis of scroll
@@ -206,10 +211,12 @@ export function getScrollPosition(window: Window, document: Document): ScrollEve
     };
 }
 
-export function getScrollPositionForElement(element: HTMLElement): ScrollEvent.Data {
+export function getScrollPositionForElement(
+    element: HTMLElement
+): ScrollEvent.Data {
     const raw: ICoords = {
         x: element.scrollLeft,
-        y: element.scrollTop,
+        y: element.scrollTop
     };
     const scrollSpace: ICoords = {
         x: element.scrollWidth,
@@ -227,7 +234,10 @@ export function getScrollTopPercentage(pos, document): number {
     return percentage.y;
 }
 
-export function getScrollPercentage(scrollSpace: ICoords, scrollPosition: ICoords): ICoords {
+export function getScrollPercentage(
+    scrollSpace: ICoords,
+    scrollPosition: ICoords
+): ICoords {
     const x = scrollPosition.x / scrollSpace.x;
     const y = scrollPosition.y / scrollSpace.y;
 
@@ -235,4 +245,4 @@ export function getScrollPercentage(scrollSpace: ICoords, scrollPosition: ICoord
         x: x || 0,
         y: y
     };
-};
+}

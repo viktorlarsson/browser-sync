@@ -4,9 +4,9 @@ import { reload } from "../vendor/Reloader";
 import { of } from "rxjs/observable/of";
 import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
-import {ClickEvent, ScrollEvent} from "./SocketNS";
-import {getDocumentScrollSpace} from "./browser.utils";
-import {merge} from "rxjs/observable/merge";
+import { ClickEvent, ScrollEvent } from "./SocketNS";
+import { getDocumentScrollSpace } from "./browser.utils";
+import { merge } from "rxjs/observable/merge";
 
 export enum EffectNames {
     FileReload = "@@FileReload",
@@ -15,7 +15,7 @@ export enum EffectNames {
     BrowserSetLocation = "@@BrowserSetLocation",
     BrowserSetScroll = "@@BrowserSetScroll",
     SetOptions = "@@SetOptions",
-    SimulateClick = "@@SimulateClick",
+    SimulateClick = "@@SimulateClick"
 }
 
 export function reloadBrowserSafe() {
@@ -73,25 +73,32 @@ export const outputHandlers$ = new BehaviorSubject({
             .withLatestFrom(inputs.window$)
             .do(([event, window]) => {
                 if (event.path) {
-                    return window.location = window.location.protocol + "//" + window.location.host + event.path;
+                    return (window.location =
+                        window.location.protocol +
+                        "//" +
+                        window.location.host +
+                        event.path);
                 }
                 if (event.url) {
-                    return window.location = event.url;
+                    return (window.location = event.url);
                 }
             })
-            .ignoreElements()
+            .ignoreElements();
     },
     [EffectNames.BrowserSetScroll]: (xs, inputs: Inputs) => {
-
         const [document$, element$] = xs
-            .withLatestFrom(inputs.window$, inputs.document$, inputs.option$.pluck('scrollProportionally'))
-            .partition(([event]) => event.tagName === 'document');
+            .withLatestFrom(
+                inputs.window$,
+                inputs.document$,
+                inputs.option$.pluck("scrollProportionally")
+            )
+            .partition(([event]) => event.tagName === "document");
 
         return merge(
             /**
              * Main window scroll
              */
-            document$.do((incoming) => {
+            document$.do(incoming => {
                 const event: ScrollEvent.IncomingPayload = incoming[0];
                 const window: Window = incoming[1];
                 const document: Document = incoming[2];
@@ -99,7 +106,10 @@ export const outputHandlers$ = new BehaviorSubject({
                 const scrollSpace = getDocumentScrollSpace(document);
 
                 if (scrollProportionally) {
-                    return window.scrollTo(0, scrollSpace.y * event.position.proportional); // % of y axis of scroll to px
+                    return window.scrollTo(
+                        0,
+                        scrollSpace.y * event.position.proportional
+                    ); // % of y axis of scroll to px
                 }
                 return window.scrollTo(0, event.position.raw.y);
             }),
@@ -111,12 +121,17 @@ export const outputHandlers$ = new BehaviorSubject({
                 const document: Document = incoming[2];
                 const scrollProportionally: boolean = incoming[3];
 
-                const matchingElements = document.getElementsByTagName(event.tagName);
+                const matchingElements = document.getElementsByTagName(
+                    event.tagName
+                );
                 if (matchingElements && matchingElements.length) {
                     const match = matchingElements[event.index];
                     if (match) {
                         if (scrollProportionally) {
-                            return match.scrollTo(0, match.scrollHeight * event.position.proportional); // % of y axis of scroll to px
+                            return match.scrollTo(
+                                0,
+                                match.scrollHeight * event.position.proportional
+                            ); // % of y axis of scroll to px
                         }
                         return match.scrollTo(0, event.position.raw.y);
                     }
@@ -127,7 +142,7 @@ export const outputHandlers$ = new BehaviorSubject({
     [EffectNames.SimulateClick]: (xs, inputs: Inputs) => {
         return xs
             .withLatestFrom(inputs.window$, inputs.document$)
-            .do((incoming) => {
+            .do(incoming => {
                 const event: ClickEvent.IncomingPayload = incoming[0];
                 const window: Window = incoming[1];
                 const document: Document = incoming[2];

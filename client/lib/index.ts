@@ -12,7 +12,7 @@ import { initLogger, logHandler$ } from "./Log";
 import { EffectNames, outputHandlers$ } from "./Effects";
 import { Nanologger } from "../vendor/logger";
 import { scrollRestoreHandlers$ } from "./ScrollRestore";
-import {initOutgoing} from "./outgoing";
+import { initOutgoing } from "./outgoing";
 
 export interface Inputs {
     window$: Observable<Window>;
@@ -31,7 +31,7 @@ export type AnyStream = Observable<any | [any, any]>;
 
 const window$ = initWindow();
 const document$ = initDocument();
-const {socket$, io$} = initSocket();
+const { socket$, io$ } = initSocket();
 const option$ = initOptions();
 const navigator$ = initOptions();
 const notifyElement$ = initNotify(option$.getValue());
@@ -47,7 +47,7 @@ const inputs: Inputs = {
     notifyElement$,
     logInstance$,
     io$,
-    outgoing$,
+    outgoing$
 };
 
 function getStream(name: string, inputs) {
@@ -71,7 +71,10 @@ const combinedEffectHandler$ = zip(
     }
 );
 
-const output$ = getStream("[socket]", inputs)(socketHandlers$, merge(inputs.socket$, outgoing$));
+const output$ = getStream("[socket]", inputs)(
+    socketHandlers$,
+    merge(inputs.socket$, outgoing$)
+);
 const effect$ = getStream("[effect]", inputs)(combinedEffectHandler$, output$);
 const dom$ = getStream("[dom-effect]", inputs)(domHandlers$, effect$);
 
