@@ -54,6 +54,25 @@ export namespace ClickEvent {
     }
 }
 
+export namespace KeyupEvent {
+    export interface Payload {
+        value: any
+        tagName: string;
+        index: number;
+    }
+    export type OutgoingPayload = Payload;
+    export type IncomingPayload = Payload;
+    export function outgoing(element: ClickEvent.ElementData, value: any): [OutgoingSocketEvents.Keyup, OutgoingPayload] {
+        return [
+            OutgoingSocketEvents.Keyup,
+            {
+                ...element,
+                value
+            }
+        ];
+    }
+}
+
 export enum IncomingSocketNames {
     Connection = "connection",
     Disconnect = "disconnect",
@@ -61,12 +80,14 @@ export enum IncomingSocketNames {
     BrowserReload = "browser:reload",
     BrowserLocation = "browser:location",
     Scroll = "scroll",
-    Click = "click"
+    Click = "click",
+    Keyup = 'input:text',
 }
 
 export enum OutgoingSocketEvents {
     Scroll = "@@outgoing/scroll",
-    Click = "@@outgoing/click"
+    Click = "@@outgoing/click",
+    Keyup = "@@outgoing/keyup",
 }
 
 export type SocketEvent = [IncomingSocketNames, any];
@@ -134,6 +155,14 @@ export const socketHandlers$ = new BehaviorSubject({
                 return [EffectNames.SimulateClick, event];
             });
     },
+    [IncomingSocketNames.Keyup]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(inputs.option$.pluck("ghostMode", "forms", "inputs"))
+            .filter(([, canClick]) => canClick)
+            .map(([event]) => {
+                return [EffectNames.SetElementValue, event];
+            });
+    },
     [OutgoingSocketEvents.Scroll]: (xs, inputs) => {
         return xs
             .withLatestFrom(inputs.io$)
@@ -144,6 +173,12 @@ export const socketHandlers$ = new BehaviorSubject({
         return xs
             .withLatestFrom(inputs.io$)
             .do(([event, io]) => io.emit(IncomingSocketNames.Click, event))
+            .ignoreElements();
+    },
+    [OutgoingSocketEvents.Keyup]: (xs, inputs) => {
+        return xs
+            .withLatestFrom(inputs.io$)
+            .do(([event, io]) => io.emit(IncomingSocketNames.Keyup, event))
             .ignoreElements();
     }
 });

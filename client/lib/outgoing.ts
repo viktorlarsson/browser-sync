@@ -1,6 +1,6 @@
 import { Observable } from "rxjs/Observable";
 import { merge } from "rxjs/observable/merge";
-import { ClickEvent, ScrollEvent } from "./SocketNS";
+import {ClickEvent, IncomingSocketNames, KeyupEvent, ScrollEvent} from "./SocketNS";
 import {
     getElementData,
     getScrollPosition,
@@ -13,15 +13,32 @@ import { concat } from "rxjs/observable/concat";
 export function initOutgoing(window: Window, document: Document, socket$) {
     const merged$ = merge(
         getScrollStream(window, document, socket$),
-        getClickStream(document, socket$)
+        getClickStream(document, socket$),
+        getFormInputStream(document, socket$)
     );
 
     return merged$;
 }
 
+function getFormInputStream(document: Document, socket$) {
+    const canSync$ = createBooleanStream(
+        socket$.filter(([name]) => name === IncomingSocketNames.Keyup)
+    );
+    return inputObservable(document)
+        .withLatestFrom(canSync$)
+        .filter(([, canSync]) => canSync)
+        .map(incoming => {
+            const keyupEvent: { target: HTMLInputElement } = incoming[0];
+            const target = getElementData(keyupEvent.target);
+            const value = keyupEvent.target.value;
+
+            return KeyupEvent.outgoing(target, value);
+        });
+}
+
 function getClickStream(document: Document, socket$) {
     const canSync$ = createBooleanStream(
-        socket$.filter(([name]) => name === "click")
+        socket$.filter(([name]) => name === IncomingSocketNames.Click)
     );
 
     return clickObservable(document)
@@ -39,7 +56,7 @@ function getScrollStream(window: Window, document: Document, socket$) {
      * other streams
      */
     const canSync$ = createBooleanStream(
-        socket$.filter(([name]) => name === "scroll")
+        socket$.filter(([name]) => name === IncomingSocketNames.Scroll)
     );
 
     return scrollObservable(window, document)
@@ -67,6 +84,18 @@ function getScrollStream(window: Window, document: Document, socket$) {
             );
         });
 }
+
+function inputObservable(document: Document) {
+    return Observable.create(obs => {
+        document.body.addEventListener("keyup", function(event) {
+            const elem = <HTMLInputElement>(event.target || event.srcElement);
+            if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
+                obs.next({ target: event.target });
+            }
+        }, true);
+    }).share();
+}
+
 
 function clickObservable(document: Document) {
     return Observable.create(obs => {
