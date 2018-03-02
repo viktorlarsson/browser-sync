@@ -56,13 +56,16 @@ export namespace ClickEvent {
 
 export namespace KeyupEvent {
     export interface Payload {
-        value: any
+        value: any;
         tagName: string;
         index: number;
     }
     export type OutgoingPayload = Payload;
     export type IncomingPayload = Payload;
-    export function outgoing(element: ClickEvent.ElementData, value: any): [OutgoingSocketEvents.Keyup, OutgoingPayload] {
+    export function outgoing(
+        element: ClickEvent.ElementData,
+        value: any
+    ): [OutgoingSocketEvents.Keyup, OutgoingPayload] {
         return [
             OutgoingSocketEvents.Keyup,
             {
@@ -81,13 +84,13 @@ export enum IncomingSocketNames {
     BrowserLocation = "browser:location",
     Scroll = "scroll",
     Click = "click",
-    Keyup = 'input:text',
+    Keyup = "input:text"
 }
 
 export enum OutgoingSocketEvents {
     Scroll = "@@outgoing/scroll",
     Click = "@@outgoing/click",
-    Keyup = "@@outgoing/keyup",
+    Keyup = "@@outgoing/keyup"
 }
 
 export type SocketEvent = [IncomingSocketNames, any];
@@ -157,7 +160,9 @@ export const socketHandlers$ = new BehaviorSubject({
     },
     [IncomingSocketNames.Keyup]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.option$.pluck("ghostMode", "forms", "inputs"))
+            .withLatestFrom(
+                inputs.option$.pluck("ghostMode", "forms", "inputs")
+            )
             .filter(([, canClick]) => canClick)
             .map(([event]) => {
                 return [EffectNames.SetElementValue, event];

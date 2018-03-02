@@ -4,7 +4,7 @@ import { reload } from "../vendor/Reloader";
 import { of } from "rxjs/observable/of";
 import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
-import {ClickEvent, KeyupEvent, ScrollEvent} from "./SocketNS";
+import { ClickEvent, KeyupEvent, ScrollEvent } from "./SocketNS";
 import { getDocumentScrollSpace } from "./browser.utils";
 import { merge } from "rxjs/observable/merge";
 
@@ -172,16 +172,14 @@ export const outputHandlers$ = new BehaviorSubject({
             .ignoreElements();
     },
     [EffectNames.SetElementValue]: (xs, inputs: Inputs) => {
-        return xs
-            .withLatestFrom(inputs.document$)
-            .do((incoming) => {
-                const event: KeyupEvent.IncomingPayload = incoming[0];
-                const document: Document = incoming[1];
-                const elems = document.getElementsByTagName(event.tagName);
-                const match = elems[event.index];
-                if (match) {
-                    (match as HTMLInputElement).value = event.value;
-                }
-            });
+        return xs.withLatestFrom(inputs.document$).do(incoming => {
+            const event: KeyupEvent.IncomingPayload = incoming[0];
+            const document: Document = incoming[1];
+            const elems = document.getElementsByTagName(event.tagName);
+            const match = elems[event.index];
+            if (match) {
+                (match as HTMLInputElement).value = event.value;
+            }
+        });
     }
 });

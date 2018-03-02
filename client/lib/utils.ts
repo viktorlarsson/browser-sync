@@ -1,3 +1,7 @@
+import { concat } from "rxjs/observable/concat";
+import { timer } from "rxjs/observable/timer";
+import { of } from "rxjs/observable/of";
+
 export function each(incoming) {
     return [].slice.call(incoming || []);
 }
@@ -132,4 +136,12 @@ export function isBlacklisted(incoming) {
     return blacklist.some(function(fn) {
         return fn(incoming);
     });
+}
+
+export function createBooleanSwitch(source$, timeout = 1000) {
+    return source$
+        .switchMap(() => {
+            return concat(of(false), timer(timeout).mapTo(true));
+        })
+        .startWith(true);
 }
