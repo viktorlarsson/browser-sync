@@ -42,7 +42,7 @@ export namespace ScrollEvent {
         tagName: string;
         index: number;
         override?: boolean;
-        pathname: string
+        pathname: string;
     }
     export function outgoing(
         data: Data,
@@ -193,7 +193,10 @@ export const socketHandlers$ = new BehaviorSubject({
     },
     [IncomingSocketNames.Scroll]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.option$.pluck("ghostMode", "scroll"), inputs.window$.pluck('location', 'pathname'))
+            .withLatestFrom(
+                inputs.option$.pluck("ghostMode", "scroll"),
+                inputs.window$.pluck("location", "pathname")
+            )
             .filter(([event, canScroll, pathname]) => {
                 return canScroll && event.pathname === pathname;
             })
@@ -203,7 +206,10 @@ export const socketHandlers$ = new BehaviorSubject({
     },
     [IncomingSocketNames.Click]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.option$.pluck("ghostMode", "clicks"), inputs.window$.pluck('location', 'pathname'))
+            .withLatestFrom(
+                inputs.option$.pluck("ghostMode", "clicks"),
+                inputs.window$.pluck("location", "pathname")
+            )
             .filter(([event, canClick, pathname]) => {
                 return canClick && event.pathname === pathname;
             })
@@ -215,7 +221,7 @@ export const socketHandlers$ = new BehaviorSubject({
         return xs
             .withLatestFrom(
                 inputs.option$.pluck("ghostMode", "forms", "inputs"),
-                inputs.window$.pluck('location', 'pathname')
+                inputs.window$.pluck("location", "pathname")
             )
             .filter(([event, canKeyup, pathname]) => {
                 return canKeyup && event.pathname === pathname;
@@ -228,7 +234,7 @@ export const socketHandlers$ = new BehaviorSubject({
         return xs
             .withLatestFrom(
                 inputs.option$.pluck("ghostMode", "forms", "toggles"),
-                inputs.window$.pluck('location', 'pathname')
+                inputs.window$.pluck("location", "pathname")
             )
             .filter(([, canClick]) => canClick)
             .map(([event]) => {
@@ -251,7 +257,10 @@ export const socketHandlers$ = new BehaviorSubject({
 
 function emitWithPathname(xs, inputs, name) {
     return xs
-        .withLatestFrom(inputs.io$, inputs.window$.pluck('location', 'pathname'))
-        .do(([event, io, pathname]) => io.emit(name, {...event, pathname}))
+        .withLatestFrom(
+            inputs.io$,
+            inputs.window$.pluck("location", "pathname")
+        )
+        .do(([event, io, pathname]) => io.emit(name, { ...event, pathname }))
         .ignoreElements();
 }
