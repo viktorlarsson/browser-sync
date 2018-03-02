@@ -10,9 +10,16 @@ import { Log } from "./Log";
 
 export namespace BrowserNotify {
     export interface IncomingPayload {
-        message: string
-        timeout: number
-        override?: boolean
+        message: string;
+        timeout: number;
+        override?: boolean;
+    }
+}
+
+export namespace BrowserLocation {
+    export interface IncomingPayload {
+        url?: string;
+        path?: number;
     }
 }
 
@@ -173,7 +180,8 @@ export const socketHandlers$ = new BehaviorSubject({
         return xs
             .withLatestFrom(inputs.option$.pluck("ghostMode", "location"))
             .filter(([, canSyncLocation]) => canSyncLocation)
-            .map(([event]) => {
+            .map(incoming => {
+                const event: BrowserLocation.IncomingPayload = incoming[0];
                 return [EffectNames.BrowserSetLocation, event];
             });
     },
@@ -214,11 +222,10 @@ export const socketHandlers$ = new BehaviorSubject({
                 return [EffectNames.SetElementToggleValue, event];
             });
     },
-    [IncomingSocketNames.BrowserNotify]: (xs) => {
-        return xs
-            .map((event: BrowserNotify.IncomingPayload) => {
-                return Log.overlayInfo(event.message, event.timeout);
-            });
+    [IncomingSocketNames.BrowserNotify]: xs => {
+        return xs.map((event: BrowserNotify.IncomingPayload) => {
+            return Log.overlayInfo(event.message, event.timeout);
+        });
     },
     [OutgoingSocketEvents.Scroll]: (xs, inputs) => {
         return xs
