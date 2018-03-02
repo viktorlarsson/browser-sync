@@ -88,7 +88,7 @@ export namespace FormToggleEvent {
     export type IncomingPayload = Payload;
     export function outgoing(
         element: ClickEvent.ElementData,
-        props: {value: string, type: string, checked: boolean}
+        props: { value: string; type: string; checked: boolean }
     ): [OutgoingSocketEvents.Toggle, OutgoingPayload] {
         return [
             OutgoingSocketEvents.Toggle,
@@ -109,14 +109,14 @@ export enum IncomingSocketNames {
     Scroll = "scroll",
     Click = "click",
     Keyup = "input:text",
-    Toggle = "input:toggles",
+    Toggle = "input:toggles"
 }
 
 export enum OutgoingSocketEvents {
     Scroll = "@@outgoing/scroll",
     Click = "@@outgoing/click",
     Keyup = "@@outgoing/keyup",
-    Toggle = "@@outgoing/Toggle",
+    Toggle = "@@outgoing/Toggle"
 }
 
 export type SocketEvent = [IncomingSocketNames, any];

@@ -4,7 +4,12 @@ import { reload } from "../vendor/Reloader";
 import { of } from "rxjs/observable/of";
 import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
-import {ClickEvent, FormToggleEvent, KeyupEvent, ScrollEvent} from "./SocketNS";
+import {
+    ClickEvent,
+    FormToggleEvent,
+    KeyupEvent,
+    ScrollEvent
+} from "./SocketNS";
 import { getDocumentScrollSpace } from "./browser.utils";
 import { merge } from "rxjs/observable/merge";
 

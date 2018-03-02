@@ -1,9 +1,16 @@
-import {IncomingSocketNames, KeyupEvent, OutgoingSocketEvent} from "./SocketNS";
+import {
+    IncomingSocketNames,
+    KeyupEvent,
+    OutgoingSocketEvent
+} from "./SocketNS";
 import { getElementData } from "./browser.utils";
 import { Observable } from "rxjs/Observable";
 import { createTimedBooleanSwitch } from "./utils";
 
-export function getFormInputStream(document: Document, socket$): Observable<OutgoingSocketEvent> {
+export function getFormInputStream(
+    document: Document,
+    socket$
+): Observable<OutgoingSocketEvent> {
     const canSync$ = createTimedBooleanSwitch(
         socket$.filter(([name]) => name === IncomingSocketNames.Keyup)
     );

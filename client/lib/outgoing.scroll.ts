@@ -1,12 +1,21 @@
 import { createTimedBooleanSwitch } from "./utils";
-import {IncomingSocketNames, OutgoingSocketEvent, OutgoingSocketEvents, ScrollEvent} from "./SocketNS";
+import {
+    IncomingSocketNames,
+    OutgoingSocketEvent,
+    OutgoingSocketEvents,
+    ScrollEvent
+} from "./SocketNS";
 import {
     getScrollPosition,
     getScrollPositionForElement
 } from "./browser.utils";
 import { Observable } from "rxjs/Observable";
 
-export function getScrollStream(window: Window, document: Document, socket$): Observable<OutgoingSocketEvent> {
+export function getScrollStream(
+    window: Window,
+    document: Document,
+    socket$
+): Observable<OutgoingSocketEvent> {
     /**
      * A stream of booleans than can be used to pause/resume
      * other streams
@@ -41,7 +50,10 @@ export function getScrollStream(window: Window, document: Document, socket$): Ob
         });
 }
 
-export function scrollObservable(window, document): Observable<{target: any}> {
+export function scrollObservable(
+    window,
+    document
+): Observable<{ target: any }> {
     return Observable.create(obs => {
         document.addEventListener(
             "scroll",

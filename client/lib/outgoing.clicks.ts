@@ -1,9 +1,16 @@
 import { createTimedBooleanSwitch } from "./utils";
-import {ClickEvent, IncomingSocketNames, OutgoingSocketEvent} from "./SocketNS";
+import {
+    ClickEvent,
+    IncomingSocketNames,
+    OutgoingSocketEvent
+} from "./SocketNS";
 import { getElementData } from "./browser.utils";
 import { Observable } from "rxjs/Observable";
 
-export function getClickStream(document: Document, socket$): Observable<OutgoingSocketEvent> {
+export function getClickStream(
+    document: Document,
+    socket$
+): Observable<OutgoingSocketEvent> {
     const canSync$ = createTimedBooleanSwitch(
         socket$.filter(([name]) => name === IncomingSocketNames.Click)
     );
