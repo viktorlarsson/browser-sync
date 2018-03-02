@@ -138,7 +138,7 @@ export function isBlacklisted(incoming) {
     });
 }
 
-export function createBooleanSwitch(source$, timeout = 1000) {
+export function createTimedBooleanSwitch(source$, timeout = 1000) {
     return source$
         .switchMap(() => {
             return concat(of(false), timer(timeout).mapTo(true));

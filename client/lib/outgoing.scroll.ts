@@ -1,4 +1,4 @@
-import { createBooleanSwitch } from "./utils";
+import { createTimedBooleanSwitch } from "./utils";
 import { IncomingSocketNames, ScrollEvent } from "./SocketNS";
 import {
     getScrollPosition,
@@ -11,7 +11,7 @@ export function getScrollStream(window: Window, document: Document, socket$) {
      * A stream of booleans than can be used to pause/resume
      * other streams
      */
-    const canSync$ = createBooleanSwitch(
+    const canSync$ = createTimedBooleanSwitch(
         socket$.filter(([name]) => name === IncomingSocketNames.Scroll)
     );
 
