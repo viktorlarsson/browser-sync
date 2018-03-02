@@ -42,6 +42,7 @@ export namespace ScrollEvent {
         tagName: string;
         index: number;
         override?: boolean;
+        pathname: string
     }
     export function outgoing(
         data: Data,
@@ -185,19 +186,27 @@ export const socketHandlers$ = new BehaviorSubject({
                 return [EffectNames.BrowserSetLocation, event];
             });
     },
+    [IncomingSocketNames.BrowserNotify]: xs => {
+        return xs.map((event: BrowserNotify.IncomingPayload) => {
+            return Log.overlayInfo(event.message, event.timeout);
+        });
+    },
     [IncomingSocketNames.Scroll]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.option$.pluck("ghostMode", "scroll"))
-            .filter(([, canScroll]) => canScroll)
+            .withLatestFrom(inputs.option$.pluck("ghostMode", "scroll"), inputs.window$.pluck('location', 'pathname'))
+            .filter(([event, canScroll, pathname]) => {
+                return canScroll && event.pathname === pathname;
+            })
             .map(([event]) => {
                 return [EffectNames.BrowserSetScroll, event];
             });
     },
     [IncomingSocketNames.Click]: (xs, inputs) => {
         return xs
-            .withLatestFrom(inputs.option$.pluck("ghostMode", "clicks"))
-            .do(x => x)
-            .filter(([, canClick]) => canClick)
+            .withLatestFrom(inputs.option$.pluck("ghostMode", "clicks"), inputs.window$.pluck('location', 'pathname'))
+            .filter(([event, canClick, pathname]) => {
+                return canClick && event.pathname === pathname;
+            })
             .map(([event]) => {
                 return [EffectNames.SimulateClick, event];
             });
@@ -205,9 +214,12 @@ export const socketHandlers$ = new BehaviorSubject({
     [IncomingSocketNames.Keyup]: (xs, inputs) => {
         return xs
             .withLatestFrom(
-                inputs.option$.pluck("ghostMode", "forms", "inputs")
+                inputs.option$.pluck("ghostMode", "forms", "inputs"),
+                inputs.window$.pluck('location', 'pathname')
             )
-            .filter(([, canClick]) => canClick)
+            .filter(([event, canKeyup, pathname]) => {
+                return canKeyup && event.pathname === pathname;
+            })
             .map(([event]) => {
                 return [EffectNames.SetElementValue, event];
             });
@@ -215,40 +227,31 @@ export const socketHandlers$ = new BehaviorSubject({
     [IncomingSocketNames.Toggle]: (xs, inputs) => {
         return xs
             .withLatestFrom(
-                inputs.option$.pluck("ghostMode", "forms", "toggles")
+                inputs.option$.pluck("ghostMode", "forms", "toggles"),
+                inputs.window$.pluck('location', 'pathname')
             )
             .filter(([, canClick]) => canClick)
             .map(([event]) => {
                 return [EffectNames.SetElementToggleValue, event];
             });
     },
-    [IncomingSocketNames.BrowserNotify]: xs => {
-        return xs.map((event: BrowserNotify.IncomingPayload) => {
-            return Log.overlayInfo(event.message, event.timeout);
-        });
-    },
     [OutgoingSocketEvents.Scroll]: (xs, inputs) => {
-        return xs
-            .withLatestFrom(inputs.io$)
-            .do(([event, io]) => io.emit(IncomingSocketNames.Scroll, event))
-            .ignoreElements();
+        return emitWithPathname(xs, inputs, IncomingSocketNames.Scroll);
     },
     [OutgoingSocketEvents.Click]: (xs, inputs) => {
-        return xs
-            .withLatestFrom(inputs.io$)
-            .do(([event, io]) => io.emit(IncomingSocketNames.Click, event))
-            .ignoreElements();
+        return emitWithPathname(xs, inputs, IncomingSocketNames.Click);
     },
     [OutgoingSocketEvents.Keyup]: (xs, inputs) => {
-        return xs
-            .withLatestFrom(inputs.io$)
-            .do(([event, io]) => io.emit(IncomingSocketNames.Keyup, event))
-            .ignoreElements();
+        return emitWithPathname(xs, inputs, IncomingSocketNames.Keyup);
     },
     [OutgoingSocketEvents.Toggle]: (xs, inputs) => {
-        return xs
-            .withLatestFrom(inputs.io$)
-            .do(([event, io]) => io.emit(IncomingSocketNames.Toggle, event))
-            .ignoreElements();
+        return emitWithPathname(xs, inputs, IncomingSocketNames.Toggle);
     }
 });
+
+function emitWithPathname(xs, inputs, name) {
+    return xs
+        .withLatestFrom(inputs.io$, inputs.window$.pluck('location', 'pathname'))
+        .do(([event, io, pathname]) => io.emit(name, {...event, pathname}))
+        .ignoreElements();
+}
