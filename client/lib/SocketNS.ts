@@ -8,6 +8,14 @@ import { empty } from "rxjs/observable/empty";
 import { EffectEvent, EffectNames, reloadBrowserSafe } from "./Effects";
 import { Log } from "./Log";
 
+export namespace BrowserNotify {
+    export interface IncomingPayload {
+        message: string
+        timeout: number
+        override?: boolean
+    }
+}
+
 export namespace ScrollEvent {
     export interface ICoords {
         x: number;
@@ -106,6 +114,7 @@ export enum IncomingSocketNames {
     FileReload = "file:reload",
     BrowserReload = "browser:reload",
     BrowserLocation = "browser:location",
+    BrowserNotify = "browser:notify",
     Scroll = "scroll",
     Click = "click",
     Keyup = "input:text",
@@ -203,6 +212,12 @@ export const socketHandlers$ = new BehaviorSubject({
             .filter(([, canClick]) => canClick)
             .map(([event]) => {
                 return [EffectNames.SetElementToggleValue, event];
+            });
+    },
+    [IncomingSocketNames.BrowserNotify]: (xs) => {
+        return xs
+            .map((event: BrowserNotify.IncomingPayload) => {
+                return Log.overlayInfo(event.message, event.timeout);
             });
     },
     [OutgoingSocketEvents.Scroll]: (xs, inputs) => {
