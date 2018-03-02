@@ -4,7 +4,7 @@ import { reload } from "../vendor/Reloader";
 import { of } from "rxjs/observable/of";
 import { async } from "rxjs/scheduler/async";
 import { concat } from "rxjs/observable/concat";
-import { ClickEvent, KeyupEvent, ScrollEvent } from "./SocketNS";
+import {ClickEvent, FormToggleEvent, KeyupEvent, ScrollEvent} from "./SocketNS";
 import { getDocumentScrollSpace } from "./browser.utils";
 import { merge } from "rxjs/observable/merge";
 
@@ -16,7 +16,8 @@ export enum EffectNames {
     BrowserSetScroll = "@@BrowserSetScroll",
     SetOptions = "@@SetOptions",
     SimulateClick = "@@SimulateClick",
-    SetElementValue = "@@SetElementValue"
+    SetElementValue = "@@SetElementValue",
+    SetElementToggleValue = "@@SetElementToggleValue"
 }
 
 export function reloadBrowserSafe() {
@@ -179,6 +180,25 @@ export const outputHandlers$ = new BehaviorSubject({
             const match = elems[event.index];
             if (match) {
                 (match as HTMLInputElement).value = event.value;
+            }
+        });
+    },
+    [EffectNames.SetElementToggleValue]: (xs, inputs: Inputs) => {
+        return xs.withLatestFrom(inputs.document$).do(incoming => {
+            const event: FormToggleEvent.IncomingPayload = incoming[0];
+            const document: Document = incoming[1];
+            const elems = document.getElementsByTagName(event.tagName);
+            const match = <HTMLInputElement>elems[event.index];
+            if (match) {
+                if (event.type === "radio") {
+                    match.checked = true;
+                }
+                if (event.type === "checkbox") {
+                    match.checked = event.checked;
+                }
+                if (event.tagName === "SELECT") {
+                    match.value = event.value;
+                }
             }
         });
     }

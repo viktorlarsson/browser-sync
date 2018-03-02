@@ -21,7 +21,7 @@ function clickObservable(document: Document) {
     return Observable.create(obs => {
         document.body.addEventListener(
             "click",
-            function(e) {
+            function(e: any) {
                 obs.next({ target: e.target });
             },
             true
