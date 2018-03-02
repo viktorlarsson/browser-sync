@@ -1,16 +1,16 @@
-import { IncomingSocketNames, KeyupEvent } from "./SocketNS";
+import {IncomingSocketNames, KeyupEvent, OutgoingSocketEvent} from "./SocketNS";
 import { getElementData } from "./browser.utils";
 import { Observable } from "rxjs/Observable";
 import { createTimedBooleanSwitch } from "./utils";
 
-export function getFormInputStream(document: Document, socket$) {
+export function getFormInputStream(document: Document, socket$): Observable<OutgoingSocketEvent> {
     const canSync$ = createTimedBooleanSwitch(
         socket$.filter(([name]) => name === IncomingSocketNames.Keyup)
     );
     return inputObservable(document)
         .withLatestFrom(canSync$)
         .filter(([, canSync]) => canSync)
-        .map(incoming => {
+        .map((incoming): OutgoingSocketEvent => {
             const keyupEvent: { target: HTMLInputElement } = incoming[0];
             const target = getElementData(keyupEvent.target);
             const value = keyupEvent.target.value;

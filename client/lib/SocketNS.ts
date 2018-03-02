@@ -120,6 +120,7 @@ export enum OutgoingSocketEvents {
 }
 
 export type SocketEvent = [IncomingSocketNames, any];
+export type OutgoingSocketEvent = [OutgoingSocketEvents, any];
 
 export const socketHandlers$ = new BehaviorSubject({
     [IncomingSocketNames.Connection]: (xs, inputs) => {

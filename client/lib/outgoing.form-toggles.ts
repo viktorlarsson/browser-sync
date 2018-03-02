@@ -1,16 +1,16 @@
-import {FormToggleEvent, IncomingSocketNames} from "./SocketNS";
+import {FormToggleEvent, IncomingSocketNames, OutgoingSocketEvent, OutgoingSocketEvents} from "./SocketNS";
 import { getElementData } from "./browser.utils";
 import { Observable } from "rxjs/Observable";
 import { createTimedBooleanSwitch } from "./utils";
 
-export function getFormTogglesStream(document: Document, socket$) {
+export function getFormTogglesStream(document: Document, socket$): Observable<OutgoingSocketEvent> {
     const canSync$ = createTimedBooleanSwitch(
         socket$.filter(([name]) => name === IncomingSocketNames.Toggle)
     );
     return inputObservable(document)
         .withLatestFrom(canSync$)
         .filter(([, canSync]) => canSync)
-        .map(incoming => {
+        .map((incoming): OutgoingSocketEvent => {
 
             const keyupEvent: { target: HTMLInputElement } = incoming[0];
             const {target} = keyupEvent;
